@@ -1,3 +1,4 @@
 *.onnx filter=lfs diff=lfs merge=lfs -text
 *.exe filter=lfs diff=lfs merge=lfs -text
 utils/upscale/realesrgan-ncnn-vulkan* filter=lfs diff=lfs merge=lfs -text
+utils/upscale/realesrgan-ncnn-vulkan filter=lfs diff=lfs merge=lfs -text
