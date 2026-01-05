@@ -1,0 +1,90 @@
+import React, { useState } from 'react';
+import DivergenceMeter from './components/DivergenceMeter';
+import './index.css';
+
+function App() {
+  const [divergence, setDivergence] = useState("1.048596");
+  const [status, setStatus] = useState("READY");
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleSelectFile = async () => {
+    const filePath = await window.electronAPI.openFile();
+    if (filePath) {
+      setSelectedFile(filePath);
+      setStatus("FILE LOADED");
+    }
+  };
+
+  const handleProcess = async () => {
+    if (!selectedFile) return;
+
+    setStatus("PROCESSING...");
+    
+    // Glitch animation start
+    const interval = setInterval(() => {
+      setDivergence((Math.random() * 2).toFixed(6));
+    }, 100);
+
+    try {
+      // Call Python Backend
+      const resultPath = await window.electronAPI.processImage({
+        filePath: selectedFile,
+        operation: 'rembg' // Hardcoded for now, we can add a toggle later
+      });
+      
+      console.log("Processed:", resultPath);
+      setStatus("COMPLETE");
+      setDivergence("0.571024"); // Steins;Gate Success Number
+    } catch (error) {
+      console.error(error);
+      setStatus("ERROR");
+      setDivergence("0.000000");
+    } finally {
+      clearInterval(interval);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative scanlines bg-gray-900">
+      
+      <h1 className="text-gray-500 tracking-[0.5em] text-sm mb-12 uppercase">
+        LABOKit <span className="text-orange-600">Electron</span> // System Online
+      </h1>
+
+      <div className="mb-8 transform hover:scale-105 transition-transform duration-500">
+        <DivergenceMeter value={divergence} />
+      </div>
+
+      <div className="flex flex-col items-center gap-4 z-20 w-64">
+        {/* File Selection Display */}
+        <div 
+            onClick={handleSelectFile}
+            className="w-full py-4 border border-dashed border-gray-600 hover:border-orange-500 text-gray-400 text-xs text-center cursor-pointer transition-colors"
+        >
+          {selectedFile ? 
+            selectedFile.split('\\').pop() : 
+            "[ CLICK TO SELECT SUBJECT ]"
+          }
+        </div>
+
+        <button 
+          onClick={handleProcess}
+          disabled={!selectedFile}
+          className={`w-full py-3 border transition-all uppercase tracking-widest font-bold text-xs rounded
+            ${selectedFile 
+              ? 'bg-orange-900/20 border-orange-600/50 text-orange-500 hover:bg-orange-600 hover:text-black hover:shadow-[0_0_15px_rgba(255,90,0,0.6)]' 
+              : 'bg-gray-800/50 border-gray-700 text-gray-600 cursor-not-allowed'}
+          `}
+        >
+          Execute Operation
+        </button>
+        
+        <div className="font-mono text-xs text-orange-800 mt-2">
+          STATUS: [{status}]
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
