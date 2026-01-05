@@ -1,15 +1,21 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "com.labokit.app",
   "asar": true,
-  "productName": "YourAppName",
+  "asarUnpack": [
+    "pyfile/**",
+    "utils/**"
+  ],
+  "productName": "LABOKit",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
     "dist",
-    "dist-electron"
+    "dist-electron",
+    "utils",
+    "pyfile"
   ],
   "mac": {
     "target": [
@@ -19,14 +25,10 @@
   },
   "win": {
     "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
+      "portable",
+      "nsis"
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "icon": "public/icon.png"
   },
   "nsis": {
     "oneClick": false,
@@ -38,6 +40,7 @@
     "target": [
       "AppImage"
     ],
-    "artifactName": "${productName}-Linux-${version}.${ext}"
+    "artifactName": "${productName}-Linux-${version}.${ext}",
+    "icon": "public/icon.png"
   }
 }

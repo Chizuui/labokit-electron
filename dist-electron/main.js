@@ -1,152 +1,102 @@
-import { app, ipcMain, dialog, BrowserWindow } from "electron";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { spawn } from "child_process";
-import { readFileSync } from "node:fs";
-let started = false;
-try {
-  const squirrel = await import("electron-squirrel-startup");
-  started = squirrel.default;
-} catch {
-  started = false;
-}
-const __filename$1 = fileURLToPath(import.meta.url);
-const __dirname$1 = path.dirname(__filename$1);
-if (started) {
-  app.quit();
-}
-let mainWindow = null;
-const createWindow = () => {
-  mainWindow = new BrowserWindow({
+import { ipcMain as s, dialog as P, app as i, BrowserWindow as E } from "electron";
+import d from "node:path";
+import { fileURLToPath as R } from "node:url";
+import { spawn as S } from "child_process";
+import { readFileSync as _ } from "node:fs";
+const $ = R(import.meta.url), f = d.dirname($);
+let o = null;
+const y = () => {
+  o = new E({
     width: 1e3,
     height: 700,
     backgroundColor: "#050505",
     titleBarStyle: "hidden",
     webPreferences: {
-      preload: path.join(__dirname$1, "preload.mjs"),
-      nodeIntegration: false,
-      contextIsolation: true
+      preload: d.join(f, "preload.mjs"),
+      nodeIntegration: !1,
+      contextIsolation: !0
     }
-  });
-  app.setPath("userData", path.join(app.getPath("appData"), "labokit-electron"));
-  if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-  } else {
-    mainWindow.loadFile(path.join(__dirname$1, "../dist/index.html"));
-  }
+  }), i.setPath("userData", d.join(i.getPath("appData"), "labokit-electron")), process.env.VITE_DEV_SERVER_URL ? o.loadURL(process.env.VITE_DEV_SERVER_URL) : o.loadFile(d.join(f, "../dist/index.html"));
 };
-ipcMain.handle("dialog:openFile", async () => {
-  const { filePaths } = await dialog.showOpenDialog({
+s.handle("dialog:openFile", async () => {
+  const { filePaths: m } = await P.showOpenDialog({
     properties: ["openFile"],
     filters: [{ name: "Images", extensions: ["jpg", "png", "jpeg", "webp"] }]
   });
-  return filePaths[0];
+  return m[0];
 });
-ipcMain.handle("process-image", async (_event, { filePath, operation, model }) => {
-  return new Promise((resolve, reject) => {
-    const outputPath = filePath.replace(/\.[^/.]+$/, "") + "_processed.png";
-    const pythonScript = path.join(__dirname$1, "../pyfile/bridge.py");
-    console.log(`Running Python: ${pythonScript}`);
-    const args = [
-      pythonScript,
-      operation,
-      "--input",
-      filePath,
-      "--output",
-      outputPath
-    ];
-    if (operation === "upscale" && model) {
-      args.push("--model", model);
-    }
-    const pythonProcess = spawn("python", args);
-    let output = "";
-    pythonProcess.stdout.on("data", (data) => {
-      const message = data.toString().trim();
-      output += message + "\n";
-      console.log(`Python: ${message}`);
-      if (message && mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("process-progress", {
-          stage: message,
-          timestamp: Date.now()
-        });
-      }
+s.handle("process-image", async (m, { filePath: r, operation: e, model: t }) => new Promise((a, c) => {
+  const p = r.replace(/\.[^/.]+$/, "") + "_processed.png";
+  let g;
+  i.isPackaged ? g = d.join(process.resourcesPath, "app.asar.unpacked", "pyfile", "bridge.py") : g = d.join(f, "../pyfile/bridge.py"), console.log(`Running Python: ${g}`);
+  const u = [
+    g,
+    e,
+    "--input",
+    r,
+    "--output",
+    p
+  ];
+  e === "upscale" && t && u.push("--model", t);
+  const h = S("python", u);
+  let w = "";
+  h.stdout.on("data", (l) => {
+    const n = l.toString().trim();
+    w += n + `
+`, console.log(`Python: ${n}`), n && o && !o.isDestroyed() && o.webContents.send("process-progress", {
+      stage: n,
+      timestamp: Date.now()
     });
-    pythonProcess.stderr.on("data", (data) => {
-      const errorMsg = data.toString();
-      console.error(`Error: ${errorMsg}`);
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("process-progress", {
-          stage: `ERROR: ${errorMsg}`,
-          timestamp: Date.now()
-        });
-      }
+  }), h.stderr.on("data", (l) => {
+    const n = l.toString();
+    console.error(`Error: ${n}`), o && !o.isDestroyed() && o.webContents.send("process-progress", {
+      stage: `ERROR: ${n}`,
+      timestamp: Date.now()
     });
-    pythonProcess.on("close", (code) => {
-      if (code === 0 && output.includes("SUCCESS")) {
-        resolve(outputPath);
-      } else {
-        reject(`Process failed with code ${code}. Output: ${output}`);
-      }
-    });
-    setTimeout(() => {
-      pythonProcess.kill();
-      reject("Process timeout");
-    }, 6e5);
-  });
-});
-ipcMain.handle("read-image-base64", async (_event, filePath) => {
+  }), h.on("close", (l) => {
+    l === 0 && w.includes("SUCCESS") ? a(p) : c(`Process failed with code ${l}. Output: ${w}`);
+  }), setTimeout(() => {
+    h.kill(), c("Process timeout");
+  }, 6e5);
+}));
+s.handle("read-image-base64", async (m, r) => {
   try {
-    const imageBuffer = readFileSync(filePath);
-    return imageBuffer.toString("base64");
-  } catch (error) {
-    throw new Error(`Failed to read image: ${error}`);
+    return _(r).toString("base64");
+  } catch (e) {
+    throw new Error(`Failed to read image: ${e}`);
   }
 });
-ipcMain.handle("get-image-dimensions", async (_event, filePath) => {
+s.handle("get-image-dimensions", async (m, r) => {
   try {
-    const imageBuffer = readFileSync(filePath);
-    let width = 0;
-    let height = 0;
-    if (imageBuffer[0] === 137 && imageBuffer[1] === 80 && imageBuffer[2] === 78 && imageBuffer[3] === 71) {
-      width = imageBuffer.readUInt32BE(16);
-      height = imageBuffer.readUInt32BE(20);
-    } else if (imageBuffer[0] === 255 && imageBuffer[1] === 216) {
-      const sizeOf = (await import("./index-CMA3ZsdK.js")).default;
-      const dimensions = sizeOf(imageBuffer);
-      width = dimensions.width || 0;
-      height = dimensions.height || 0;
+    const e = _(r);
+    let t = 0, a = 0;
+    if (e[0] === 137 && e[1] === 80 && e[2] === 78 && e[3] === 71)
+      t = e.readUInt32BE(16), a = e.readUInt32BE(20);
+    else if (e[0] === 255 && e[1] === 216) {
+      const c = (await import("./index-0KC8p6e7.js")).default, p = c(e);
+      t = p.width || 0, a = p.height || 0;
     }
-    if (width === 0 || height === 0) {
+    if (t === 0 || a === 0)
       throw new Error("Could not determine image dimensions");
-    }
-    return { width, height };
-  } catch (error) {
-    throw new Error(`Failed to get image dimensions: ${error}`);
+    return { width: t, height: a };
+  } catch (e) {
+    throw new Error(`Failed to get image dimensions: ${e}`);
   }
 });
-app.whenReady().then(() => {
-  createWindow();
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+i.whenReady().then(() => {
+  y(), i.on("activate", () => {
+    E.getAllWindows().length === 0 && y();
   });
 });
-ipcMain.on("window:minimize", () => {
-  mainWindow?.minimize();
+s.on("window:minimize", () => {
+  o?.minimize();
 });
-ipcMain.on("window:maximize", () => {
-  if (mainWindow?.isMaximized()) {
-    mainWindow.unmaximize();
-  } else {
-    mainWindow?.maximize();
-  }
+s.on("window:maximize", () => {
+  o?.isMaximized() ? o.unmaximize() : o?.maximize();
 });
-ipcMain.on("window:close", () => {
-  mainWindow?.close();
+s.on("window:close", () => {
+  o?.close();
 });
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+i.on("window-all-closed", () => {
+  process.platform !== "darwin" && i.quit();
 });

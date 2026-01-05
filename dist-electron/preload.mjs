@@ -1,15 +1,1 @@
-"use strict";
-const electron = require("electron");
-electron.contextBridge.exposeInMainWorld("electronAPI", {
-  openFile: () => electron.ipcRenderer.invoke("dialog:openFile"),
-  processImage: (data) => electron.ipcRenderer.invoke("process-image", data),
-  readImageAsBase64: (filePath) => electron.ipcRenderer.invoke("read-image-base64", filePath),
-  getImageDimensions: (filePath) => electron.ipcRenderer.invoke("get-image-dimensions", filePath),
-  onProcessProgress: (callback) => {
-    electron.ipcRenderer.on("process-progress", (_event, data) => callback(data));
-    return () => electron.ipcRenderer.removeListener("process-progress", callback);
-  },
-  minimizeWindow: () => electron.ipcRenderer.send("window:minimize"),
-  maximizeWindow: () => electron.ipcRenderer.send("window:maximize"),
-  closeWindow: () => electron.ipcRenderer.send("window:close")
-});
+"use strict";const e=require("electron");e.contextBridge.exposeInMainWorld("electronAPI",{openFile:()=>e.ipcRenderer.invoke("dialog:openFile"),processImage:i=>e.ipcRenderer.invoke("process-image",i),readImageAsBase64:i=>e.ipcRenderer.invoke("read-image-base64",i),getImageDimensions:i=>e.ipcRenderer.invoke("get-image-dimensions",i),onProcessProgress:i=>(e.ipcRenderer.on("process-progress",(n,r)=>i(r)),()=>e.ipcRenderer.removeListener("process-progress",i)),minimizeWindow:()=>e.ipcRenderer.send("window:minimize"),maximizeWindow:()=>e.ipcRenderer.send("window:maximize"),closeWindow:()=>e.ipcRenderer.send("window:close")});

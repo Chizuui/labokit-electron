@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './index.css';
 
 function App() {
@@ -8,7 +8,6 @@ function App() {
   const [operation, setOperation] = useState<'upscale' | 'rembg'>('upscale');
   const [model, setModel] = useState("realesrgan-x4plus");
   const [progress, setProgress] = useState<string>("");
-  const [resultPath, setResultPath] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedDimensions, setSelectedDimensions] = useState<{ width: number; height: number } | null>(null);
   const [resultDimensions, setResultDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -34,12 +33,12 @@ function App() {
     return () => unsubscribe?.();
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectFile = async () => {
     const filePath = await window.electronAPI.openFile();
     if (filePath) {
       setSelectedFile(filePath);
       setStatus("FILE LOADED");
-      setResultPath(null);
       setResultImage(null);
       setResultDimensions(null);
       
@@ -73,7 +72,6 @@ function App() {
       });
       
       console.log("Processed:", result);
-      setResultPath(result);
       setStatus("COMPLETE");
       setDivergence("0.571024"); // Steins;Gate Success Number
       
@@ -93,7 +91,6 @@ function App() {
       console.error(error);
       setStatus("ERROR");
       setDivergence("0.000000");
-      setResultPath(null);
       setResultImage(null);
       setResultDimensions(null);
     } finally {
@@ -119,13 +116,6 @@ function App() {
     return progressMap[progress] || progress;
   };
 
-  const getImageUrl = (path: string | null) => {
-    if (!path) return '';
-    // Convert Windows path to file:// URL
-    const cleanPath = path.replace(/\\/g, '/');
-    return `file:///${cleanPath}`;
-  };
-
   const handleMinimize = () => {
     window.electronAPI?.minimizeWindow?.();
   };
@@ -137,9 +127,11 @@ function App() {
   const handleClose = () => {
     window.electronAPI?.closeWindow?.();
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <div className="min-h-screen w-full flex flex-col relative bg-gray-900">
       {/* Custom Titlebar - Matches UI Style */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <div 
         className="h-8 bg-gray-900/90 border-b border-orange-600/20 flex items-center justify-between px-4 text-orange-600 text-xs font-bold tracking-widest uppercase select-none"
         style={{ WebkitAppRegion: 'drag' } as any}
@@ -147,6 +139,7 @@ function App() {
         <div>LABOKit</div>
         
         {/* Window Control Buttons */}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <div className="flex gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <button
             onClick={handleMinimize}
@@ -387,7 +380,6 @@ function App() {
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 px-4 py-2 border border-gray-600 flex items-center justify-between gap-4 bg-gray-900/80 rounded">
                   <button
                     onClick={() => {
-                      setResultPath(null);
                       setResultImage(null);
                       setResultDimensions(null);
                       setZoom(1);

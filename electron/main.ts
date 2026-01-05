@@ -4,21 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { spawn } from 'child_process'
 import { readFileSync } from 'node:fs'
 
-// Handle electron-squirrel-startup safely
-let started = false;
-try {
-  const squirrel = await import('electron-squirrel-startup');
-  started = squirrel.default;
-} catch {
-  started = false;
-}
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-if (started) {
-  app.quit();
-}
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -56,7 +43,15 @@ ipcMain.handle('dialog:openFile', async () => {
 ipcMain.handle('process-image', async (_event, { filePath, operation, model }) => {
   return new Promise((resolve, reject) => {
     const outputPath = filePath.replace(/\.[^/.]+$/, "") + "_processed.png";
-    const pythonScript = path.join(__dirname, '../pyfile/bridge.py');
+    
+    // Get the correct path for the Python script
+    // If packaged, get from app.asar.unpacked (because we use asarUnpack)
+    let pythonScript: string;
+    if (app.isPackaged) {
+      pythonScript = path.join(process.resourcesPath, 'app.asar.unpacked', 'pyfile', 'bridge.py');
+    } else {
+      pythonScript = path.join(__dirname, '../pyfile/bridge.py');
+    }
 
     console.log(`Running Python: ${pythonScript}`);
 

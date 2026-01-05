@@ -1,11 +1,14 @@
 {
-  "name": "labokit-electron---template-react",
+  "name": "labokit",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "build:win": "tsc && vite build && electron-builder --win portable nsis",
+    "build:linux": "tsc && vite build && electron-builder --linux AppImage",
+    "build:all": "tsc && vite build && electron-builder -mwl",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

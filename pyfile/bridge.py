@@ -3,10 +3,7 @@ import argparse
 from PIL import Image
 import subprocess
 import os
-<<<<<<< HEAD
 import platform
-=======
->>>>>>> de83944 (first commit)
 from pathlib import Path
 
 def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
@@ -14,7 +11,6 @@ def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
         print("PROCESSING", flush=True)
         print("UPSCALING_STARTED", flush=True)
         
-<<<<<<< HEAD
         # Get the RealESRGAN executable path based on OS
         project_root = Path(__file__).parent.parent
         upscale_dir = project_root / "utils" / "upscale"
@@ -31,12 +27,10 @@ def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
             raise OSError(f"Unsupported operating system: {system}")
         
         models_dir = upscale_dir / "models"
-=======
         # Get the RealESRGAN executable path
         project_root = Path(__file__).parent.parent
         realesrgan_exe = project_root / "utils" / "upscale" / "realesrgan-ncnn-vulkan.exe"
         models_dir = project_root / "utils" / "upscale" / "models"
->>>>>>> de83944 (first commit)
         
         if not realesrgan_exe.exists():
             raise FileNotFoundError(f"RealESRGAN executable not found at {realesrgan_exe}")
