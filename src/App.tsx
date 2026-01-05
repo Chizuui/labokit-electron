@@ -1,0 +1,419 @@
+import React, { useState, useEffect } from 'react';
+import './index.css';
+
+function App() {
+  const [divergence, setDivergence] = useState("1.048596");
+  const [status, setStatus] = useState("READY");
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [operation, setOperation] = useState<'upscale' | 'rembg'>('upscale');
+  const [model, setModel] = useState("realesrgan-x4plus");
+  const [progress, setProgress] = useState<string>("");
+  const [resultPath, setResultPath] = useState<string | null>(null);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [selectedDimensions, setSelectedDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [resultDimensions, setResultDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const models = [
+    { name: "RealESRGAN x4 Plus", value: "realesrgan-x4plus" },
+    { name: "RealESRGAN x4 Plus Anime", value: "realesrgan-x4plus-anime" },
+    { name: "RealESR Anime x2", value: "realesr-animevideov3-x2" },
+    { name: "RealESR Anime x3", value: "realesr-animevideov3-x3" },
+    { name: "RealESR Anime x4", value: "realesr-animevideov3-x4" }
+  ];
+
+  useEffect(() => {
+    // Listen for progress updates from Electron
+    const unsubscribe = window.electronAPI?.onProcessProgress?.((data: any) => {
+      setProgress(data.stage);
+      console.log('Progress:', data.stage);
+    });
+
+    return () => unsubscribe?.();
+  }, []);
+
+  const handleSelectFile = async () => {
+    const filePath = await window.electronAPI.openFile();
+    if (filePath) {
+      setSelectedFile(filePath);
+      setStatus("FILE LOADED");
+      setResultPath(null);
+      setResultImage(null);
+      setResultDimensions(null);
+      
+      // Get selected image dimensions
+      try {
+        const dims = await window.electronAPI.getImageDimensions(filePath);
+        setSelectedDimensions(dims);
+      } catch (error) {
+        console.error('Failed to get image dimensions:', error);
+      }
+    }
+  };
+
+  const handleProcess = async () => {
+    if (!selectedFile) return;
+
+    setStatus("PROCESSING...");
+    setProgress("");
+    
+    // Glitch animation start
+    const interval = setInterval(() => {
+      setDivergence((Math.random() * 2).toFixed(6));
+    }, 100);
+
+    try {
+      // Call Python Backend
+      const result = await window.electronAPI.processImage({
+        filePath: selectedFile,
+        operation: operation,
+        model: operation === 'upscale' ? model : undefined
+      });
+      
+      console.log("Processed:", result);
+      setResultPath(result);
+      setStatus("COMPLETE");
+      setDivergence("0.571024"); // Steins;Gate Success Number
+      
+      // Load result image as base64
+      try {
+        const base64 = await window.electronAPI.readImageAsBase64(result);
+        const mimeType = result.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+        setResultImage(`data:${mimeType};base64,${base64}`);
+        
+        // Get result dimensions
+        const dims = await window.electronAPI.getImageDimensions(result);
+        setResultDimensions(dims);
+      } catch (error) {
+        console.error('Failed to load result image:', error);
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus("ERROR");
+      setDivergence("0.000000");
+      setResultPath(null);
+      setResultImage(null);
+      setResultDimensions(null);
+    } finally {
+      clearInterval(interval);
+    }
+  };
+
+  const getProgressDisplay = () => {
+    if (!progress) return "";
+    
+    const progressMap: { [key: string]: string } = {
+      'PROCESSING': '⏳ Loading...',
+      'UPSCALING_STARTED': '⬆️ Starting Upscale...',
+      'MODEL_SELECTED': '🤖 Model Loaded',
+      'EXECUTING_UPSCALE': '⚙️ Upscaling...',
+      'UPSCALE_COMPLETE': '✓ Upscale Done',
+      'LOADING_MODEL': '📥 Loading Model...',
+      'REMOVING_BACKGROUND': '✂️ Removing Background...',
+      'SAVING': '💾 Saving...',
+      'SUCCESS': '✓ Success!'
+    };
+    
+    return progressMap[progress] || progress;
+  };
+
+  const getImageUrl = (path: string | null) => {
+    if (!path) return '';
+    // Convert Windows path to file:// URL
+    const cleanPath = path.replace(/\\/g, '/');
+    return `file:///${cleanPath}`;
+  };
+
+  const handleMinimize = () => {
+    window.electronAPI?.minimizeWindow?.();
+  };
+
+  const handleMaximize = () => {
+    window.electronAPI?.maximizeWindow?.();
+  };
+
+  const handleClose = () => {
+    window.electronAPI?.closeWindow?.();
+  };
+  return (
+    <div className="min-h-screen w-full flex flex-col relative bg-gray-900">
+      {/* Custom Titlebar - Matches UI Style */}
+      <div 
+        className="h-8 bg-gray-900/90 border-b border-orange-600/20 flex items-center justify-between px-4 text-orange-600 text-xs font-bold tracking-widest uppercase select-none"
+        style={{ WebkitAppRegion: 'drag' } as any}
+      >
+        <div>LABOKit</div>
+        
+        {/* Window Control Buttons */}
+        <div className="flex gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <button
+            onClick={handleMinimize}
+            className="w-6 h-6 flex items-center justify-center text-orange-600 hover:bg-orange-600/20 rounded transition-colors"
+            title="Minimize"
+          >
+            −
+          </button>
+          <button
+            onClick={handleMaximize}
+            className="w-6 h-6 flex items-center justify-center text-orange-600 hover:bg-orange-600/20 rounded transition-colors"
+            title="Maximize"
+          >
+            ▢
+          </button>
+          <button
+            onClick={handleClose}
+            className="w-6 h-6 flex items-center justify-center text-orange-600 hover:bg-red-600/30 rounded transition-colors"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-1 relative overflow-hidden bg-gray-900 scanlines flex-col">
+        <div className="flex flex-1 overflow-hidden gap-3 p-4">
+          {/* Left Sidebar - Controls */}
+          <div className="w-80 flex-shrink-0 border border-gray-700 bg-gray-900/80 p-6 overflow-y-auto flex flex-col rounded">
+            <h1 className="text-gray-500 tracking-[0.5em] text-xs mb-8 uppercase">
+              LABOKit <span className="text-orange-600">Electron Ver</span>
+            </h1>
+
+            {/* Operation Toolbar */}
+            <div className="mb-6 border border-gray-600 bg-gray-900/50 p-4 rounded">
+              <div className="text-xs text-gray-500 mb-3 uppercase tracking-widest">[ Operation Mode ]</div>
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setOperation('upscale')}
+                  className={`flex-1 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
+                    ${operation === 'upscale'
+                      ? 'bg-orange-600/30 border-orange-600 text-orange-500 shadow-[0_0_10px_rgba(255,90,0,0.4)]'
+                      : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-orange-600/50'
+                    }
+                  `}
+                >
+                  ⬆ Upscale
+                </button>
+                <button
+                  onClick={() => setOperation('rembg')}
+                  className={`flex-1 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
+                    ${operation === 'rembg'
+                      ? 'bg-orange-600/30 border-orange-600 text-orange-500 shadow-[0_0_10px_rgba(255,90,0,0.4)]'
+                      : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-orange-600/50'
+                    }
+                  `}
+                >
+                  ✂ Remove BG
+                </button>
+              </div>
+
+              {/* Model Selector for Upscale */}
+              {operation === 'upscale' && (
+                <div className="pt-3 border-t border-gray-700">
+                  <label className="text-xs text-gray-500 uppercase tracking-widest block mb-2">
+                    Upscale Model
+                  </label>
+                  <select
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    title="Select upscaling model"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-xs text-orange-400 rounded cursor-pointer hover:border-orange-600/50 focus:border-orange-600 focus:outline-none"
+                  >
+                    {models.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* File Selection Display */}
+            <div 
+                onClick={handleSelectFile}
+                className="mb-4 py-4 border border-dashed border-gray-600 hover:border-orange-500 text-gray-400 text-xs text-center cursor-pointer transition-colors rounded"
+            >
+              {selectedFile ? 
+                selectedFile.split('\\').pop() : 
+                "[ CLICK TO SELECT SUBJECT ]"
+              }
+              {selectedDimensions && (
+                <div className="text-orange-500 text-xs mt-2">
+                  {selectedDimensions.width}x{selectedDimensions.height}px
+                </div>
+              )}
+            </div>
+
+            {/* Resolution Comparison */}
+            {selectedDimensions && resultDimensions && (
+              <div className="mb-4 p-3 border border-orange-600/30 bg-orange-900/10 rounded text-xs text-orange-400 space-y-1">
+                <div className="font-bold uppercase tracking-widest">Resolution</div>
+                <div>Before: {selectedDimensions.width}x{selectedDimensions.height}</div>
+                <div>After: {resultDimensions.width}x{resultDimensions.height}</div>
+                <div className="text-orange-500 font-bold">
+                  Scale: {(resultDimensions.width / selectedDimensions.width).toFixed(1)}x
+                </div>
+              </div>
+            )}
+
+            <button 
+              onClick={handleProcess}
+              disabled={!selectedFile}
+              className={`w-full py-3 border transition-all uppercase tracking-widest font-bold text-xs rounded mb-4
+                ${selectedFile 
+                  ? 'bg-orange-900/20 border-orange-600/50 text-orange-500 hover:bg-orange-600 hover:text-black hover:shadow-[0_0_15px_rgba(255,90,0,0.6)]' 
+                  : 'bg-gray-800/50 border-gray-700 text-gray-600 cursor-not-allowed'}
+              `}
+            >
+              Execute Operation
+            </button>
+
+            {/* Progress Display */}
+            {progress && (
+              <div className="mb-4 py-3 px-4 border border-orange-600/50 bg-orange-900/20 rounded text-center">
+                <div className="text-xs text-orange-400 animate-pulse">
+                  {getProgressDisplay()}
+                </div>
+              </div>
+            )}
+            
+            <div className="font-mono text-xs text-orange-800">
+              STATUS: [{status}]
+            </div>
+          </div>
+
+          {/* Right Panel - Result Display */}
+          <div className="flex-1 flex flex-col overflow-hidden border border-orange-600/50 rounded bg-gray-900/50 relative min-h-0" style={{ maxHeight: '100%' }}>
+            {/* Zoom Controls - Floating at Top Center (Only when result exists) */}
+            {resultImage && (
+              <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 border border-gray-600 bg-gray-900/80 rounded p-2">
+                <div className="text-xs text-gray-500 uppercase tracking-widest self-center hidden sm:block">Zoom</div>
+                <button
+                  onClick={() => setZoom(1)}
+                  className={`px-3 py-1 text-xs font-bold uppercase transition-all rounded
+                    ${zoom === 1
+                      ? 'bg-orange-600/50 text-orange-400 border border-orange-600'
+                      : 'border border-orange-600/30 text-orange-600/70 hover:bg-orange-900/40'
+                    }
+                  `}
+                >
+                  100%
+                </button>
+                <button
+                  onClick={() => setZoom(2)}
+                  className={`px-3 py-1 text-xs font-bold uppercase transition-all rounded
+                    ${zoom === 2
+                      ? 'bg-orange-600/50 text-orange-400 border border-orange-600'
+                      : 'border border-orange-600/30 text-orange-600/70 hover:bg-orange-900/40'
+                    }
+                  `}
+                >
+                  2x
+                </button>
+                <button
+                  onClick={() => setZoom(4)}
+                  className={`px-3 py-1 text-xs font-bold uppercase transition-all rounded
+                    ${zoom === 4
+                      ? 'bg-orange-600/50 text-orange-400 border border-orange-600'
+                      : 'border border-orange-600/30 text-orange-600/70 hover:bg-orange-900/40'
+                    }
+                  `}
+                >
+                  4x
+                </button>
+                <button
+                  onClick={() => setZoom(8)}
+                  className={`px-3 py-1 text-xs font-bold uppercase transition-all rounded
+                    ${zoom === 8
+                      ? 'bg-orange-600/50 text-orange-400 border border-orange-600'
+                      : 'border border-orange-600/30 text-orange-600/70 hover:bg-orange-900/40'
+                    }
+                  `}
+                >
+                  8x
+                </button>
+              </div>
+            )}
+            {resultImage ? (
+              <>
+                {/* Image Display with Zoom - Fixed Container */}
+                <div
+                  className="overflow-auto border border-orange-600/50 rounded w-full cursor-grab active:cursor-grabbing select-none hide-scrollbar"
+                  style={{ 
+                    flex: '1 0 0',
+                    minHeight: '0',
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}
+                  onMouseDown={(e) => {
+                    if (zoom > 1) {
+                      setIsDragging(true);
+                      setDragStart({ x: e.clientX, y: e.clientY });
+                    }
+                  }}
+                  onMouseMove={(e) => {
+                    if (!isDragging || zoom <= 1) return;
+                    const container = e.currentTarget;
+                    const dx = e.clientX - dragStart.x;
+                    const dy = e.clientY - dragStart.y;
+                    container.scrollLeft -= dx;
+                    container.scrollTop -= dy;
+                    setDragStart({ x: e.clientX, y: e.clientY });
+                  }}
+                  onMouseUp={() => setIsDragging(false)}
+                  onMouseLeave={() => setIsDragging(false)}
+                >
+                <img 
+                  src={resultImage} 
+                  alt="Processed result" 
+                  className="pointer-events-none"
+                  style={{
+                    maxWidth: zoom === 1 ? '100%' : 'none',
+                    maxHeight: zoom === 1 ? '100%' : 'none',
+                    width: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                    height: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                    objectFit: 'contain',
+                    userSelect: 'none'
+                  }}
+                  draggable={false}
+                />
+                </div>
+
+                {/* Clear Button with Divergence Display - Floating at Bottom */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 px-4 py-2 border border-gray-600 flex items-center justify-between gap-4 bg-gray-900/80 rounded">
+                  <button
+                    onClick={() => {
+                      setResultPath(null);
+                      setResultImage(null);
+                      setResultDimensions(null);
+                      setZoom(1);
+                    }}
+                    className="text-gray-400 text-xs uppercase hover:text-orange-400 transition-colors"
+                  >
+                    Clear Result
+                  </button>
+                  <div className="font-mono text-sm text-orange-500 tracking-widest">
+                    {divergence}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-gray-600 flex-1 flex flex-col items-center justify-center">
+                <div className="text-lg mb-4">⏳</div>
+                <p className="text-xs uppercase tracking-widest">
+                  {selectedFile ? 'Ready to process' : 'Select an image to begin'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;

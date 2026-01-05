@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define the Font - Ensure the file name matches exactly what you downloaded */
+@font-face {
+  font-family: 'DSEG14';
+  src: url('./assets/fonts/DSEG14Classic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  background-color: #050505;
+  color: #e0e0e0;
+  overflow: hidden; /* App-like feel */
+}
+
+/* Make title area draggable on macOS/Windows with hidden titlebar */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  -webkit-app-region: drag;
+  z-index: 100;
+  pointer-events: none;
+}
+
+@layer utilities {
+  /* The Steins;Gate Orange Glow */
+  .nixie-glow {
+    color: #ff5a00;
+    text-shadow:
+      0 0 2px rgba(255, 230, 200, 0.8),
+      0 0 5px rgba(255, 90, 0, 0.9),
+      0 0 15px rgba(255, 40, 0, 0.6);
+  }
+
+  /* Scanline Overlay */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.2) 50%,
+      rgba(0, 0, 0, 0.2)
+    );
+    background-size: 100% 4px;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
