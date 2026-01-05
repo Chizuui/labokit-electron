@@ -12,7 +12,8 @@ dist
 dist-ssr
 dist-electron
 release
-public
+public/*
+!public/icon.png
 bak
 *.local
 
