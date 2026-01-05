@@ -10,13 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-<<<<<<< HEAD
-utils
 public
 bak
-
-=======
->>>>>>> de83944 (first commit)
 *.local
 
 # Editor directories and files
