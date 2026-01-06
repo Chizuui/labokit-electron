@@ -1,8 +1,44 @@
-# LABOKit But Electron Version
+# LABOKit Electron Version
 
 A sci-fi themed image processing application built with Electron, React, and TypeScript. Features real-time image upscaling and background removal with an immersive retro-futuristic UI inspired by *Steins;Gate*.
 
 <img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
+
+## Quick Start
+
+### For End Users (Recommended)
+**Download pre-built applications** - No setup required!
+
+#### Linux
+```bash
+wget https://github.com/Chizuui/labokit-electron/releases/download/v1.0.0/LABOKit-Linux-1.0.0.AppImage
+chmod +x LABOKit-Linux-1.0.0.AppImage
+./LABOKit-Linux-1.0.0.AppImage
+```
+
+#### Windows
+Download `LABOKit-Setup-1.0.0.exe` from [Releases](https://github.com/Chizuui/labokit-electron/releases) and run the installer.
+
+### For Developers (Build from Source)
+
+#### Linux
+```bash
+git clone https://github.com/Chizuui/labokit-electron.git
+cd labokit-electron
+git checkout linux  # Switch to Linux branch with setup scripts
+./setup-linux.sh    # Install dependencies
+npm run dev:linux   # Start development
+```
+
+#### Windows
+```bash
+git clone https://github.com/Chizuui/labokit-electron.git
+cd labokit-electron
+npm install
+npm run dev         # Start development
+```
+
+---
 
 ## Features
 
@@ -13,7 +49,7 @@ A sci-fi themed image processing application built with Electron, React, and Typ
 <img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/40ddaa25-1fda-4b94-81b0-c8356cce66c3" />
 
 
-- **Background Removal**: Remove image backgrounds using the rembg library with local u2net model ( still WIP )
+- **Background Removal**: Remove image backgrounds using the rembg library with local u2net model (WIP)
 
 <img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/c4f4a998-14b1-405d-82cc-b41915155fc1" />
 
@@ -42,6 +78,8 @@ A sci-fi themed image processing application built with Electron, React, and Typ
   - DSEG14 digital font display
   - Divergence meter inspired by Steins;Gate
 
+---
+
 ## Project Structure
 
 ```
@@ -61,6 +99,8 @@ labokit-electron/
 ├── utils/
 │   ├── upscale/          # RealESRGAN models and executable
 │   └── rembg/            # rembg u2net model
+├── public/
+│   └── icon.png          # Application icon
 └── vite.config.ts        # Vite configuration
 ```
 
@@ -71,55 +111,78 @@ labokit-electron/
 - **Build Tool**: Vite + esbuild
 - **Python Backend**: RealESRGAN, rembg
 - **Styling**: Tailwind CSS with custom animations
+- **Packaging**: electron-builder (AppImage for Linux, NSIS for Windows)
 
-## Installation
+---
+
+## Installation & Setup
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.8+
-- npm or yarn
+- **Node.js 18+**
+- **npm or yarn**
+- **Python 3.8+** (development only, bundled in releases)
 
-### Setup
+### Option 1: Clone and Develop (Linux)
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/Chizuui/labokit-electron.git
 cd labokit-electron
+git checkout linux
+./setup-linux.sh  # One-time setup - installs all dependencies
 ```
 
-2. Install dependencies:
+### Option 2: Clone and Develop (Windows)
+
 ```bash
+git clone https://github.com/Chizuui/labokit-electron.git
+cd labokit-electron
 npm install
 ```
 
-3. Install Python dependencies (if not bundled):
-```bash
-pip install rembg torch torchvision
-```
+---
 
 ## Development
 
-Start the development server with hot reload:
-
+### Linux
 ```bash
-npm run dev
+npm run dev:linux    # Start Vite dev server with native Electron
 ```
 
-This will start the Vite dev server and Electron app simultaneously.
-
-## Building
-
-Build the application for production:
-
+### Windows
 ```bash
-npm run build
+npm run dev          # Start Vite dev server with Electron
 ```
 
-Build and package for distribution:
-
+### Available Commands
 ```bash
-npm run build && npm run electron-builder
+npm run dev           # Dev mode (current platform)
+npm run dev:linux     # Dev mode with native Linux Electron
+npm run build         # Build for current platform
+npm run build:linux   # Build AppImage for Linux distribution
+npm run build:win     # Build installer for Windows distribution
+npm run build:all     # Build for all platforms
 ```
+
+---
+
+## Building for Distribution
+
+### Build Linux AppImage
+```bash
+git checkout linux
+./setup-linux.sh
+npm run build:linux
+# Output: release/1.0.0/LABOKit-Linux-1.0.0.AppImage
+```
+
+### Build Windows Installer
+```bash
+npm install
+npm run build:win
+# Output: release/1.0.0/LABOKit-Setup-1.0.0.exe
+```
+
+---
 
 ## Usage
 
@@ -139,8 +202,9 @@ npm run build && npm run electron-builder
 5. **View Results**: 
    - Use zoom buttons (100%, 2x, 4x, 8x) to inspect details
    - Drag to pan when zoomed in
-   - SVG and raster images both supported
    - Clear result button to reset for new processing
+
+---
 
 ## Configuration
 
@@ -166,26 +230,57 @@ The application uses Electron IPC for communication between main and renderer pr
 - `get-image-dimensions`: Extract image width/height
 - `minimize-window`, `maximize-window`, `close-window`: Window controls
 
-## Performance Notes
-
-- First run processes may be slow due to Python model initialization
-- Zoom operations are performed client-side in the browser
-- Large images (>4K) may impact performance during real-time operations
+---
 
 ## Troubleshooting
 
-### Python not found
-Ensure Python is in your system PATH and rembg is properly installed.
+### Linux Issues
+| Problem | Solution |
+|---------|----------|
+| "Permission denied" on AppImage | Run `chmod +x LABOKit-Linux-1.0.0.AppImage` |
+| AppImage won't launch | Install FUSE2: `sudo apt install libfuse2` |
+| `npm run dev:linux` not found | Make sure you're on `linux` branch: `git checkout linux` |
+| Python errors in dev | Run `./setup-linux.sh` to install dependencies |
 
-### Image processing fails
-Check that model files exist in `utils/upscale/` and `utils/rembg/`
+### Windows Issues
+| Problem | Solution |
+|---------|----------|
+| Installer won't run | Try running as Administrator |
+| App crashes on startup | Uninstall completely and reinstall |
+| Image processing fails | Ensure `utils/` folder has all model files |
 
-### App won't start
-Try clearing the dist folder and rebuilding:
+### General Issues
+| Problem | Solution |
+|---------|----------|
+| Models downloading slowly | First run downloads ~500MB, be patient |
+| High memory usage | Close other apps, LABOKit uses 2-4GB during processing |
+| File not found errors | Use absolute paths or drag-and-drop images |
+| App won't start | Try: `rm -rf dist-electron dist && npm run build` |
+
+---
+
+## Performance Notes
+
+- **First run**: Models download (~500MB) and initialize (~1-2 minutes)
+- **Subsequent runs**: Faster as models are cached
+- **Zoom operations**: Client-side, very responsive
+- **Large images**: 4K+ images may impact performance
+- **Memory**: Allocate 2-4GB RAM for processing
+
+---
+
+## Branch Information
+
+- **`main`** - Stable release version (Windows/Linux binaries included)
+- **`linux`** - Linux development branch with setup scripts and build tools
+
+To switch branches:
 ```bash
-rm -rf dist-electron dist
-npm run build
+git checkout linux
+git checkout main
 ```
+
+---
 
 ## License
 
@@ -207,7 +302,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - **RealESRGAN**: https://github.com/xinntao/Real-ESRGAN
 - **rembg**: https://github.com/danielgatis/rembg
 - **Steins;Gate**: Original anime by White Fox
-- **LABOKit ( Original Source )**: https://github.com/wagakano/LABOKit
+- **LABOKit (Original Source)**: https://github.com/wagakano/LABOKit
 
 ## Disclaimer
 
