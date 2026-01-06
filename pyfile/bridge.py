@@ -102,7 +102,9 @@ def remove_background(input_path, output_path):
             raise FileNotFoundError(f"u2net.onnx model not found at {model_path}")
         
         print("LOADING_MODEL", flush=True)
-        # Create session with local model - use the model file path directly
+        # Set environment variable to prevent model download
+        os.environ['U2NET_HOME'] = str(model_path.parent)
+        # Create session with local model
         session = new_session("u2net", providers=["CPUExecutionProvider"])
         
         with open(input_path, 'rb') as i:
