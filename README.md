@@ -262,6 +262,19 @@ If you run the app without Python packages installed:
 - **Format Conversion** still works (basic PIL included with Python)
 - **Background Removal** will fail with an error asking you to run the pip install command
 
+### FAQ: Why Aren't These Packages Bundled?
+
+**For a detailed explanation**, see [PYTHON_PACKAGES_EXPLAINED.md](PYTHON_PACKAGES_EXPLAINED.md).
+
+**Short answer**: 
+- PyTorch alone is 2-3GB; bundling all packages would make the AppImage 5-10GB
+- Users need different versions for different GPUs (NVIDIA, AMD, CPU-only)
+- Users can update packages independently of app updates
+
+For a comprehensive breakdown of the architecture, see:
+- [PYTHON_DEPENDENCIES.md](PYTHON_DEPENDENCIES.md) - Technical details and setup instructions
+- [PYTHON_PACKAGES_EXPLAINED.md](PYTHON_PACKAGES_EXPLAINED.md) - Why this design was chosen
+
 ### First-Time Setup
 
 **Linux:**
