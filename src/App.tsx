@@ -5,8 +5,9 @@ function App() {
   const [divergence, setDivergence] = useState("1.048596");
   const [status, setStatus] = useState("READY");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [operation, setOperation] = useState<'upscale' | 'rembg'>('upscale');
+  const [operation, setOperation] = useState<'upscale' | 'rembg' | 'convert'>('upscale');
   const [model, setModel] = useState("realesrgan-x4plus");
+  const [convertFormat, setConvertFormat] = useState("png");
   const [progress, setProgress] = useState<string>("");
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedDimensions, setSelectedDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -117,7 +118,8 @@ function App() {
       const result = await window.electronAPI.processImage({
         filePath: selectedFile,
         operation: operation,
-        model: operation === 'upscale' ? model : undefined
+        model: operation === 'upscale' ? model : undefined,
+        format: operation === 'convert' ? convertFormat : undefined
       });
       
       console.log("Processed:", result);
@@ -127,12 +129,27 @@ function App() {
       // Load result image as base64
       try {
         const base64 = await window.electronAPI.readImageAsBase64(result);
-        const mimeType = result.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+        let mimeType = 'image/jpeg';
+        
+        if (result.toLowerCase().endsWith('.png')) {
+          mimeType = 'image/png';
+        } else if (result.toLowerCase().endsWith('.webp')) {
+          mimeType = 'image/webp';
+        } else if (result.toLowerCase().endsWith('.gif')) {
+          mimeType = 'image/gif';
+        } else if (result.toLowerCase().endsWith('.bmp')) {
+          mimeType = 'image/bmp';
+        } else if (result.toLowerCase().endsWith('.svg')) {
+          mimeType = 'image/svg+xml';
+        }
+        
         setResultImage(`data:${mimeType};base64,${base64}`);
         
-        // Get result dimensions
-        const dims = await window.electronAPI.getImageDimensions(result);
-        setResultDimensions(dims);
+        // Get result dimensions (skip for SVG)
+        if (!result.toLowerCase().endsWith('.svg')) {
+          const dims = await window.electronAPI.getImageDimensions(result);
+          setResultDimensions(dims);
+        }
       } catch (error) {
         console.error('Failed to load result image:', error);
       }
@@ -226,10 +243,10 @@ function App() {
             {/* Operation Toolbar */}
             <div className="mb-6 border border-gray-600 bg-gray-900/50 p-4 rounded">
               <div className="text-xs text-gray-500 mb-3 uppercase tracking-widest">[ Operation Mode ]</div>
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-col gap-2 mb-4 w-full">
                 <button
                   onClick={() => setOperation('upscale')}
-                  className={`flex-1 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
+                  className={`py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
                     ${operation === 'upscale'
                       ? 'bg-orange-600/30 border-orange-600 text-orange-500 shadow-[0_0_10px_rgba(255,90,0,0.4)]'
                       : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-orange-600/50'
@@ -240,7 +257,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setOperation('rembg')}
-                  className={`flex-1 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
+                  className={`py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
                     ${operation === 'rembg'
                       ? 'bg-orange-600/30 border-orange-600 text-orange-500 shadow-[0_0_10px_rgba(255,90,0,0.4)]'
                       : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-orange-600/50'
@@ -248,6 +265,17 @@ function App() {
                   `}
                 >
                   ✂ Remove BG
+                </button>
+                <button
+                  onClick={() => setOperation('convert')}
+                  className={`py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-all rounded
+                    ${operation === 'convert'
+                      ? 'bg-orange-600/30 border-orange-600 text-orange-500 shadow-[0_0_10px_rgba(255,90,0,0.4)]'
+                      : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-orange-600/50'
+                    }
+                  `}
+                >
+                  🔄 Convert
                 </button>
               </div>
 
@@ -268,6 +296,28 @@ function App() {
                         {m.name}
                       </option>
                     ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Format Selector for Convert */}
+              {operation === 'convert' && (
+                <div className="pt-3 border-t border-gray-700">
+                  <label className="text-xs text-gray-500 uppercase tracking-widest block mb-2">
+                    Output Format
+                  </label>
+                  <select
+                    value={convertFormat}
+                    onChange={(e) => setConvertFormat(e.target.value)}
+                    title="Select output format"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-xs text-orange-400 rounded cursor-pointer hover:border-orange-600/50 focus:border-orange-600 focus:outline-none"
+                  >
+                    <option value="jpg">JPG (JPEG)</option>
+                    <option value="png">PNG</option>
+                    <option value="webp">WebP</option>
+                    <option value="bmp">BMP</option>
+                    <option value="gif">GIF</option>
+                    <option value="svg">SVG</option>
                   </select>
                 </div>
               )}
@@ -419,20 +469,36 @@ function App() {
                   onMouseUp={() => setIsDragging(false)}
                   onMouseLeave={() => setIsDragging(false)}
                 >
-                <img 
-                  src={resultImage} 
-                  alt="Processed result" 
-                  className="pointer-events-none"
-                  style={{
-                    maxWidth: zoom === 1 ? '100%' : 'none',
-                    maxHeight: zoom === 1 ? '100%' : 'none',
-                    width: zoom === 1 ? 'auto' : `${100 * zoom}%`,
-                    height: zoom === 1 ? 'auto' : `${100 * zoom}%`,
-                    objectFit: 'contain',
-                    userSelect: 'none'
-                  }}
-                  draggable={false}
-                />
+                {resultImage && resultImage.endsWith('.svg') ? (
+                  <object 
+                    data={resultImage}
+                    type="image/svg+xml"
+                    className="pointer-events-none"
+                    style={{
+                      maxWidth: zoom === 1 ? '100%' : 'none',
+                      maxHeight: zoom === 1 ? '100%' : 'none',
+                      width: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                      height: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                      objectFit: 'contain',
+                      userSelect: 'none'
+                    }}
+                  />
+                ) : (
+                  <img 
+                    src={resultImage} 
+                    alt="Processed result" 
+                    className="pointer-events-none"
+                    style={{
+                      maxWidth: zoom === 1 ? '100%' : 'none',
+                      maxHeight: zoom === 1 ? '100%' : 'none',
+                      width: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                      height: zoom === 1 ? 'auto' : `${100 * zoom}%`,
+                      objectFit: 'contain',
+                      userSelect: 'none'
+                    }}
+                    draggable={false}
+                  />
+                )}
                 </div>
 
                 {/* Clear Button with Divergence Display - Floating at Bottom */}

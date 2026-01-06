@@ -5,6 +5,8 @@ import subprocess
 import os
 import platform
 from pathlib import Path
+from io import BytesIO
+import base64
 
 def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
     try:
@@ -122,12 +124,110 @@ def remove_background(input_path, output_path):
         print(f"TRACEBACK: {traceback.format_exc()}", flush=True)
         sys.exit(1)
 
+def convert_image(input_path, output_path, output_format="png"):
+    try:
+        print("PROCESSING", flush=True)
+        print("CONVERTING_IMAGE", flush=True)
+        
+        # Open the image
+        img = Image.open(input_path)
+        
+        print(f"LOADING_IMAGE", flush=True)
+        
+        # Convert RGBA to RGB if needed for formats that don't support transparency
+        if output_format.lower() in ['jpg', 'jpeg', 'bmp'] and img.mode in ['RGBA', 'LA', 'P']:
+            print("CONVERTING_COLOR_SPACE", flush=True)
+            # Create white background
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            background.paste(img, mask=img.split()[-1] if img.mode in ['RGBA', 'LA'] else None)
+            img = background
+        
+        print(f"SAVING_AS_{output_format.upper()}", flush=True)
+        
+        # Determine output format and quality settings
+        save_kwargs = {}
+        if output_format.lower() in ['jpg', 'jpeg']:
+            save_kwargs['quality'] = 95
+            save_kwargs['optimize'] = True
+        elif output_format.lower() == 'png':
+            save_kwargs['optimize'] = True
+        elif output_format.lower() == 'webp':
+            save_kwargs['quality'] = 95
+        elif output_format.lower() == 'gif':
+            # GIF conversion
+            if img.mode != 'P':
+                img = img.convert('P', palette=Image.Palette.ADAPTIVE)
+        
+        # Save the image
+        img.save(output_path, format=output_format.upper(), **save_kwargs)
+        
+        print("SUCCESS", flush=True)
+    except Exception as e:
+        print(f"ERROR: {str(e)}", flush=True)
+        import traceback
+        print(f"TRACEBACK: {traceback.format_exc()}", flush=True)
+        sys.exit(1)
+
+def convert_to_svg(input_path, output_path):
+    try:
+        print("PROCESSING", flush=True)
+        print("CONVERTING_TO_SVG", flush=True)
+        
+        # Open the image
+        img = Image.open(input_path)
+        
+        print("LOADING_IMAGE", flush=True)
+        
+        # Convert to RGB if needed
+        if img.mode in ['RGBA', 'LA']:
+            print("CONVERTING_COLOR_SPACE", flush=True)
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            background.paste(img, mask=img.split()[-1])
+            img = background
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        print("CONVERTING_TO_SVG", flush=True)
+        
+        # Convert image to base64 for embedding in SVG
+        img_byte_arr = BytesIO()
+        img.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+        img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        
+        width, height = img.size
+        
+        # Create SVG with embedded image
+        svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+  <defs>
+    <style>
+      image {{ image-rendering: crisp-edges; }}
+    </style>
+  </defs>
+  <image x="0" y="0" width="{width}" height="{height}" xlink:href="data:image/png;base64,{img_base64}"/>
+</svg>'''
+        
+        # Write SVG file
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(svg_content)
+        
+        print("SUCCESS", flush=True)
+    except Exception as e:
+        print(f"ERROR: {str(e)}", flush=True)
+        import traceback
+        print(f"TRACEBACK: {traceback.format_exc()}", flush=True)
+        sys.exit(1)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", help="The operation to perform (upscale, rembg)")
+    parser.add_argument("command", help="The operation to perform (upscale, rembg, convert)")
     parser.add_argument("--input", help="Input file path", required=True)
     parser.add_argument("--output", help="Output file path", required=True)
     parser.add_argument("--model", default="realesrgan-x4plus", help="Model to use for upscaling")
+    parser.add_argument("--format", default="png", help="Output format for conversion (jpg, png, webp, bmp, gif, svg)")
     
     args = parser.parse_args()
 
@@ -135,5 +235,10 @@ if __name__ == "__main__":
         upscale_image(args.input, args.output, args.model)
     elif args.command == "rembg":
         remove_background(args.input, args.output)
+    elif args.command == "convert":
+        if args.format.lower() == "svg":
+            convert_to_svg(args.input, args.output)
+        else:
+            convert_image(args.input, args.output, args.format)
     else:
         print("UNKNOWN_COMMAND", flush=True)

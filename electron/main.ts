@@ -49,9 +49,10 @@ ipcMain.handle('dialog:openFile', async () => {
   return filePaths[0];
 });
 
-ipcMain.handle('process-image', async (_event, { filePath, operation, model }) => {
+ipcMain.handle('process-image', async (_event, { filePath, operation, model, format }) => {
   return new Promise((resolve, reject) => {
-    const outputPath = filePath.replace(/\.[^/.]+$/, "") + "_processed.png";
+    const outputExt = operation === 'convert' && format ? format : 'png';
+    const outputPath = filePath.replace(/\.[^/.]+$/, "") + "_processed." + outputExt;
     
     // Get the correct path for the Python script
     // If packaged, get from app.asar.unpacked (because we use asarUnpack)
@@ -73,6 +74,10 @@ ipcMain.handle('process-image', async (_event, { filePath, operation, model }) =
 
     if (operation === 'upscale' && model) {
       args.push('--model', model);
+    }
+
+    if (operation === 'convert' && format) {
+      args.push('--format', format);
     }
 
     const pythonProcess = spawn('python', args);
