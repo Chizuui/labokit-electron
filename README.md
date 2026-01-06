@@ -26,9 +26,6 @@ chmod +x LABOKit-Linux-1.0.0.AppImage
 ```bash
 # Install Python image processing dependencies (required for all features)
 pip install rembg torch torchvision onnxruntime
-
-# Download and run the installer
-# LABOKit-Setup-1.0.0.exe from https://github.com/Chizuui/labokit-electron/releases
 ```
 Download from [Releases](https://github.com/Chizuui/labokit-electron/releases) and run the installer.
 
