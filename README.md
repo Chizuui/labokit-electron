@@ -20,7 +20,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 - Auto-adjusts colors and quality
 
 ### Capture??
-Check [Screenshots](#Screenshots)
+- Check [Screenshots](#Screenshots)
 ---
 
 ## Installation
