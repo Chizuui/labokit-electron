@@ -29,10 +29,6 @@ def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
             raise OSError(f"Unsupported operating system: {system}")
         
         models_dir = upscale_dir / "models"
-        # Get the RealESRGAN executable path
-        project_root = Path(__file__).parent.parent
-        realesrgan_exe = project_root / "utils" / "upscale" / "realesrgan-ncnn-vulkan.exe"
-        models_dir = project_root / "utils" / "upscale" / "models"
         
         if not realesrgan_exe.exists():
             raise FileNotFoundError(f"RealESRGAN executable not found at {realesrgan_exe}")
