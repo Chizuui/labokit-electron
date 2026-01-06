@@ -1,392 +1,291 @@
-# LABOKit Electron Version
+# LABOKit - Image Processing Tool
 
-A sci-fi themed image processing application built with Electron, React, and TypeScript. Features real-time image upscaling and background removal with an immersive retro-futuristic UI inspired by *Steins;Gate*.
+A simple and powerful image processing application with a cool sci-fi theme. Upscale images, remove backgrounds, and convert formats - all in one place!
 
-<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
+## What Can You Do?
 
-## Quick Start
+### 1. **Upscale Images** 📈
+Make small images bigger and clearer using AI technology.
+- 2x, 3x, or 4x size increase
+- Special support for anime images
 
-### For End Users (Recommended)
-**Download pre-built applications** - No setup required!
+### 2. **Remove Background** 🎨
+Remove the background from any image automatically.
+- One-click background removal
+- Keep your subject, remove everything else
 
-#### Linux
+### 3. **Convert Image Formats** 🖼️
+Change image type: JPG → PNG, PNG → WebP, etc.
+- Supports: JPG, PNG, WebP, BMP, GIF, SVG
+- Auto-adjusts colors and quality
+
+---
+
+## Installation
+
+### Quick Start (30 seconds)
+
+#### **Windows Users:**
+1. Download from [Releases](https://github.com/Chizuui/labokit-electron/releases)
+2. Run `LABOKit-Setup-1.0.0.exe`
+3. Done! Open the app
+
+#### **Linux Users:**
 ```bash
-# Install Python image processing dependencies (required for all features)
-pip install rembg torch torchvision onnxruntime
-
-# Download and run
+# Download the app
 wget https://github.com/Chizuui/labokit-electron/releases/download/v1.0.0/LABOKit-Linux-1.0.0.AppImage
+
+# Make it executable
 chmod +x LABOKit-Linux-1.0.0.AppImage
+
+# Run it
 ./LABOKit-Linux-1.0.0.AppImage
 ```
 
-> **Note**: The AppImage bundles model files but requires Python packages to be installed on your system. This allows flexibility in package versions and CUDA support.
-
-#### Windows
-```bash
-# Install Python image processing dependencies (required for all features)
-pip install rembg torch torchvision onnxruntime
-```
-Download from [Releases](https://github.com/Chizuui/labokit-electron/releases) and run the installer.
-
-### For Developers (Build from Source)
-
-#### Linux
-```bash
-git clone https://github.com/Chizuui/labokit-electron.git
-cd labokit-electron
-git checkout linux  # Switch to Linux branch with setup scripts
-./setup-linux.sh    # Install dependencies
-npm run dev:linux   # Start development
-```
-
-#### Windows
-```bash
-git clone https://github.com/Chizuui/labokit-electron.git
-cd labokit-electron
-npm install
-npm run dev         # Start development
-```
-
 ---
 
-## Features
+## First Time Setup
 
-- **Image Upscaling**: Enhance image resolution using RealESRGAN models
-  - Support for 2x, 3x, and 4x scaling
-  - Anime-specific models available (RealESR Anime and RealESRGAN Anime)
+**Important:** To use all features (especially background removal), you need to install Python packages.
 
-<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/40ddaa25-1fda-4b94-81b0-c8356cce66c3" />
-
-
-- **Background Removal**: Remove image backgrounds using the rembg library with local u2net model (WIP)
-
-<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/c4f4a998-14b1-405d-82cc-b41915155fc1" />
-
-
-- **Image Format Conversion**: Convert images between multiple formats
-  - Supported formats: JPG, PNG, WebP, BMP, GIF, and SVG
-  - Smart color space conversion (RGBA to RGB for non-transparent formats)
-  - Quality optimization for each format
-
-<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/f265db64-1cd7-49d4-bc40-98d38b472d16" />
-
-
-- **Advanced Zoom & Pan**: 
-  - Multiple zoom levels (100%, 2x, 4x, 8x)
-  - Drag-pan functionality for zoomed images
-  - Smooth scrolling without visible scrollbars
-  - Support for both raster and SVG image viewing
-
-- **Real-time Resolution Tracking**: 
-  - Display before/after resolution comparison
-  - Calculate upscaling multiplier
-
-- **Sci-Fi UI Theme**:
-  - Retro-futuristic orange neon glow effects
-  - Scanline overlay animation
-  - DSEG14 digital font display
-  - Divergence meter inspired by Steins;Gate
-
----
-
-## Project Structure
-
-```
-labokit-electron/
-├── electron/
-│   ├── main.ts           # Electron main process
-│   ├── preload.ts        # IPC context bridge
-│   └── electron-env.d.ts # Type definitions
-├── src/
-│   ├── App.tsx           # Main React component
-│   ├── index.css         # Global styles
-│   ├── main.tsx          # React entry point
-│   └── components/
-│       └── DivergenceMeter.jsx # Status display
-├── pyfile/
-│   └── bridge.py         # Python image processing backend
-├── utils/
-│   ├── upscale/          # RealESRGAN models and executable
-│   └── rembg/            # rembg u2net model
-├── public/
-│   └── icon.png          # Application icon
-└── vite.config.ts        # Vite configuration
-```
-
-## Stack Used
-
-- **Frontend**: React 18 + TypeScript + Tailwind CSS
-- **Desktop Framework**: Electron
-- **Build Tool**: Vite + esbuild
-- **Python Backend**: RealESRGAN, rembg
-- **Styling**: Tailwind CSS with custom animations
-- **Packaging**: electron-builder (AppImage for Linux, NSIS for Windows)
-
----
-
-## Installation & Setup
-
-### Prerequisites
-- **Node.js 18+**
-- **npm or yarn**
-- **Python 3.8+** (development only, bundled in releases)
-
-### Option 1: Clone and Develop (Linux)
-
-```bash
-git clone https://github.com/Chizuui/labokit-electron.git
-cd labokit-electron
-git checkout linux
-./setup-linux.sh  # One-time setup - installs all dependencies
-```
-
-### Option 2: Clone and Develop (Windows)
-
-```bash
-git clone https://github.com/Chizuui/labokit-electron.git
-cd labokit-electron
-npm install
-```
-
----
-
-## Development
-
-### Linux
-```bash
-npm run dev:linux    # Start Vite dev server with native Electron
-```
-
-### Windows
-```bash
-npm run dev          # Start Vite dev server with Electron
-```
-
-### Available Commands
-```bash
-npm run dev           # Dev mode (current platform)
-npm run dev:linux     # Dev mode with native Linux Electron
-npm run build         # Build for current platform
-npm run build:linux   # Build AppImage for Linux distribution
-npm run build:win     # Build installer for Windows distribution
-npm run build:all     # Build for all platforms
-```
-
----
-
-## Building for Distribution
-
-### Build Linux AppImage
-```bash
-git checkout linux
-./setup-linux.sh
-npm run build:linux
-# Output: release/1.0.0/LABOKit-Linux-1.0.0.AppImage
-```
-
-### Build Windows Installer
-```bash
-npm install
-npm run build:win
-# Output: release/1.0.0/LABOKit-Setup-1.0.0.exe
-```
-
----
-
-## Usage
-
-1. **Select Operation Mode**: Choose between:
-   - **Upscale**: Enhance image resolution with AI upscaling
-   - **Remove BG**: Remove image background automatically
-   - **Convert**: Convert image to different formats
-
-2. **Select Model or Format**:
-   - For Upscaling: Choose from RealESRGAN x4 Plus, RealESRGAN x4 Plus Anime, or RealESR Anime x2/x3/x4
-   - For Converting: Select output format (JPG, PNG, WebP, BMP, GIF, or SVG)
-
-3. **Load Image**: Click on the image selector or drag-and-drop an image file
-
-4. **Execute**: Click "Execute Operation" to process the image
-
-5. **View Results**: 
-   - Use zoom buttons (100%, 2x, 4x, 8x) to inspect details
-   - Drag to pan when zoomed in
-   - Clear result button to reset for new processing
-
----
-
-## Configuration
-
-### Image Models
-- **Upscaling Models**: Located in `utils/upscale/`
-  - RealESRGAN executable with multiple .param files
-  
-- **Background Removal**: Located in `utils/rembg/`
-  - Local u2net.onnx model file for offline processing
-
-### UI Customization
-Edit `src/index.css` for theme colors and effects:
-- Orange neon glow: `#ff5a00`
-- Scanline effects opacity
-- Font definitions
-
-## Python Dependencies
-
-The application requires specific Python packages for image processing features. These are **NOT** bundled in the AppImage/EXE to allow flexibility in package versions and hardware acceleration (GPU/CUDA support).
-
-### Required Packages
-```bash
-pip install rembg torch torchvision onnxruntime
-```
-
-### What Each Package Does
-- **rembg**: Background removal using AI (remove-background feature)
-- **torch + torchvision**: Deep learning framework for ML models
-- **onnxruntime**: Efficient neural network inference engine
-
-### Alternative: Install All Optional Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-This installs all development dependencies including PIL and OpenCV for format conversion.
-
-### If You Don't Install Dependencies
-
-If you run the app without Python packages installed:
-- **Upscaling** still works (RealESRGAN binary is bundled)
-- **Format Conversion** still works (basic PIL included with Python)
-- **Background Removal** will fail with an error asking you to run the pip install command
-
-### FAQ: Why Aren't These Packages Bundled?
-
-**For a detailed explanation**, see [PYTHON_PACKAGES_EXPLAINED.md](PYTHON_PACKAGES_EXPLAINED.md).
-
-**Short answer**: 
-- PyTorch alone is 2-3GB; bundling all packages would make the AppImage 5-10GB
-- Users need different versions for different GPUs (NVIDIA, AMD, CPU-only)
-- Users can update packages independently of app updates
-
-For a comprehensive breakdown of the architecture, see:
-- [PYTHON_DEPENDENCIES.md](PYTHON_DEPENDENCIES.md) - Technical details and setup instructions
-- [PYTHON_PACKAGES_EXPLAINED.md](PYTHON_PACKAGES_EXPLAINED.md) - Why this design was chosen
-
-### First-Time Setup
-
-**Linux:**
-```bash
-# 1. Install system dependencies
-sudo apt update && sudo apt install python3 python3-pip  # Ubuntu/Debian
-# OR
-sudo dnf install python3 python3-pip  # Fedora
-# OR
-pacman -S python python-pip  # Arch
-
-# 2. Install Python packages
-pip install rembg torch torchvision onnxruntime
-
-# 3. Download and run AppImage
-./LABOKit-Linux-1.0.0.AppImage
-```
+### Step 1: Install Python (if you don't have it)
 
 **Windows:**
-```bash
-# 1. Download and install Python from python.org (3.10+)
-# 2. Install Python packages
-pip install rembg torch torchvision onnxruntime
+- Go to [python.org](https://www.python.org/downloads/)
+- Download Python 3.10 or newer
+- Run the installer
+- ✅ Make sure to check "Add Python to PATH"
 
-# 3. Run the installer
-LABOKit-Setup-1.0.0.exe
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install python3 python3-pip
 ```
+
+**Linux (Fedora):**
+```bash
+sudo dnf install python3 python3-pip
+```
+
+**Linux (Arch):**
+```bash
+pacman -S python python-pip
+```
+
+### Step 2: Install Required Packages
+
+Open Command Prompt (Windows) or Terminal (Linux/Mac) and run:
+
+```bash
+pip install rembg torch torchvision onnxruntime
+```
+
+⏳ **This takes 5-15 minutes** (torch is large)
+
+### Step 3: Run LABOKit
+
+Done! Now all features work perfectly.
 
 ---
 
-## IPC Communication
+## How to Use
 
-The application uses Electron IPC for communication between main and renderer processes:
-
-- `process-image`: Spawn Python subprocess for image operations
-- `read-image-base64`: Convert image files to base64 data
-- `get-image-dimensions`: Extract image width/height
-- `minimize-window`, `maximize-window`, `close-window`: Window controls
+### Basic Steps:
+1. **Open LABOKit**
+2. **Choose what you want to do:**
+   - Click "Upscale" to make image bigger
+   - Click "Remove BG" to remove background
+   - Click "Convert" to change format
+3. **Pick your image:**
+   - Click the folder icon to select
+   - Or drag and drop your image
+4. **Pick settings:**
+   - For upscale: Choose 2x, 3x, or 4x
+   - For convert: Choose JPG, PNG, WebP, etc.
+5. **Click "Execute"**
+6. **Wait for processing** (takes 10 seconds to 2 minutes)
+7. **View and save your result**
 
 ---
 
 ## Troubleshooting
 
-### Linux Issues
-| Problem | Solution |
-|---------|----------|
-| "Permission denied" on AppImage | Run `chmod +x LABOKit-Linux-1.0.0.AppImage` |
-| AppImage won't launch | Install FUSE2: `sudo apt install libfuse2` |
-| `npm run dev:linux` not found | Make sure you're on `linux` branch: `git checkout linux` |
-| Python errors in dev | Run `./setup-linux.sh` to install dependencies |
+### Problem: "Python packages required" error
 
-### Windows Issues
-| Problem | Solution |
-|---------|----------|
-| Installer won't run | Try running as Administrator |
-| App crashes on startup | Uninstall completely and reinstall |
-| Image processing fails | Ensure `utils/` folder has all model files |
-
-### General Issues
-| Problem | Solution |
-|---------|----------|
-| "Missing Python packages" error | Run `pip install rembg torch torchvision onnxruntime` |
-| Background removal not working | Ensure Python packages are installed (see Python Dependencies section) |
-| Models downloading slowly | First run downloads ~500MB, be patient |
-| High memory usage | Close other apps, LABOKit uses 2-4GB during processing |
-| File not found errors | Use absolute paths or drag-and-drop images |
-| App won't start | Try: `rm -rf dist-electron dist && npm run build` |
-
----
-
-## Performance Notes
-
-- **First run**: Models download (~500MB) and initialize (~1-2 minutes)
-- **Subsequent runs**: Faster as models are cached
-- **Zoom operations**: Client-side, very responsive
-- **Large images**: 4K+ images may impact performance
-- **Memory**: Allocate 2-4GB RAM for processing
-
----
-
-## Branch Information
-
-- **`main`** - Stable release version (Windows/Linux binaries included)
-- **`linux`** - Linux development branch with setup scripts and build tools
-
-To switch branches:
+**Solution:** Run this command:
 ```bash
-git checkout linux
-git checkout main
+pip install rembg torch torchvision onnxruntime
 ```
+
+### Problem: AppImage won't open (Linux)
+
+**Solution:**
+```bash
+chmod +x LABOKit-Linux-1.0.0.AppImage
+./LABOKit-Linux-1.0.0.AppImage
+```
+
+### Problem: "FUSE2 not found" error (Linux)
+
+**Solution:**
+```bash
+# Ubuntu/Debian
+sudo apt install libfuse2
+
+# Fedora
+sudo dnf install fuse
+
+# Arch
+pacman -S fuse2
+```
+
+### Problem: Background removal doesn't work
+
+**Check:**
+1. Did you run `pip install rembg torch torchvision onnxruntime`?
+2. Does the error message show? Read it carefully!
+3. Try restarting the app
+
+### Problem: App uses too much memory
+
+**Solution:**
+- Close other apps
+- Process smaller images first
+- The app needs 2-4 GB RAM
+
+### Problem: Processing is very slow
+
+**First run takes longer** (downloads and initializes AI models)
+- First time: 1-2 minutes
+- After that: Much faster (cached)
+
+---
+
+## For Developers
+
+Want to modify the code? Here's how to set up development:
+
+### Linux:
+```bash
+git clone https://github.com/Chizuui/labokit-electron.git
+cd labokit-electron
+git checkout linux
+./setup-linux.sh
+npm run dev:linux
+```
+
+### Windows:
+```bash
+git clone https://github.com/Chizuui/labokit-electron.git
+cd labokit-electron
+npm install
+npm run dev
+```
+
+### Build for Distribution:
+
+**Linux:**
+```bash
+npm run build:linux
+# Creates: LABOKit-Linux-1.0.0.AppImage
+```
+
+**Windows:**
+```bash
+npm run build:win
+# Creates: LABOKit-Setup-1.0.0.exe
+```
+
+---
+
+## What's Inside?
+
+### Technology
+- **Frontend:** React + TypeScript (the visual interface you see)
+- **Desktop:** Electron (makes it work on Windows/Linux)
+- **Backend:** Python (does the image processing)
+- **AI Models:** RealESRGAN (upscaling), rembg (background removal)
+
+### File Structure
+```
+LABOKit/
+├── src/              # User interface code
+├── electron/         # Desktop app code
+├── pyfile/           # Image processing code (Python)
+├── utils/            # AI models and tools
+└── public/           # Icons and images
+```
+
+---
+
+## Features Explained
+
+### Upscaling
+- Uses RealESRGAN AI model
+- Makes images bigger WITHOUT losing quality
+- Works on photos and anime art
+- 2x to 4x magnification
+
+### Remove Background
+- Uses rembg AI model
+- Removes background, keeps subject
+- Works best with clear subjects
+- Perfect for product photos
+
+### Image Conversion
+- Convert between formats
+- Supports modern formats (WebP for smaller file size)
+- Auto-adjusts color space
+- Optimizes quality
+
+### Zoom & Pan
+- Zoom in to see details (100%, 2x, 4x, 8x)
+- Drag to move around when zoomed
+- Compare before/after side by side
+
+---
+
+## Common Questions
+
+**Q: Why do I need to install Python packages?**
+A: They contain the AI technology for background removal and upscaling. Including them in the app would make it 5-10 GB (too big).
+
+**Q: Do I need internet after setup?**
+A: No! Once installed, everything works offline.
+
+**Q: Can I use my GPU (graphics card)?**
+A: Yes! If you have NVIDIA GPU, follow [PyTorch CUDA setup](https://pytorch.org/get-started/locally/).
+
+**Q: How long does processing take?**
+A: Depends on image size:
+- Small (< 1 MP): 10-30 seconds
+- Medium (1-5 MP): 30-60 seconds
+- Large (> 5 MP): 1-2 minutes
+
+**Q: What's the best image quality?**
+A: PNG or WebP give best results. JPG is smaller but lower quality.
+
+---
+
+## Support & Links
+
+- **Having issues?** Check [Troubleshooting](#troubleshooting) section above
+- **More details?** See [PYTHON_DEPENDENCIES.md](PYTHON_DEPENDENCIES.md)
+- **Want to code?** See development section above
+- **Report bug?** Open an issue on GitHub
+
+---
+
+## Credits
+
+- **RealESRGAN:** Image upscaling AI
+- **rembg:** Background removal AI
+- **Electron:** Desktop framework
+- **React:** User interface
+- **Steins;Gate:** UI inspiration
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Inspiration
-
-UI design inspired by the sci-fi anime *Steins;Gate*, featuring:
-- Divergence meter concept
-- Time travel theme elements
-- Retro-futuristic aesthetic
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Credits
-
-- **RealESRGAN**: https://github.com/xinntao/Real-ESRGAN
-- **rembg**: https://github.com/danielgatis/rembg
-- **Steins;Gate**: Original anime by White Fox
-- **LABOKit (Original Source)**: https://github.com/wagakano/LABOKit
-
-## Disclaimer
-
-This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
+MIT License - You're free to use and modify!
