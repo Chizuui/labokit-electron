@@ -1,4 +1,4 @@
-# LABOKit Electron
+# LABOKit But Electron Version
 
 A sci-fi themed image processing application built with Electron, React, and TypeScript. Features real-time image upscaling and background removal with an immersive retro-futuristic UI inspired by *Steins;Gate*.
 
@@ -53,7 +53,7 @@ labokit-electron/
 └── vite.config.ts        # Vite configuration
 ```
 
-## Technology Stack
+## Stack Used
 
 - **Frontend**: React 18 + TypeScript + Tailwind CSS
 - **Desktop Framework**: Electron
@@ -72,7 +72,7 @@ labokit-electron/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/labokit-electron.git
+git clone https://github.com/Chizuui/labokit-electron.git
 cd labokit-electron
 ```
 
@@ -200,8 +200,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Disclaimer
 
 This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: January 6, 2026
