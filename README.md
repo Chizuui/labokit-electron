@@ -94,7 +94,7 @@ npm install
 
 3. Install Python dependencies (if not bundled):
 ```bash
-pip install rembg torch torchvision
+pip install rembg torch torchvision onnxruntime
 ```
 
 ## Development
