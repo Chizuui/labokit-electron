@@ -20,7 +20,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 - Auto-adjusts colors and quality
 
 ### Screenshots??
-- Check [Screenshots](#Screenshots)
+- Check [Screenshots](#Capture)
 ---
 
 ## Installation
@@ -295,7 +295,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
 
 
-## Screenshots
+## Capture
 
 <img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
 
