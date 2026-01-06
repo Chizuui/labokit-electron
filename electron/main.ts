@@ -19,11 +19,20 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false, // Allow file protocol access for drag and drop
     },
   });
 
   // Set user data path to avoid cache permission issues
   app.setPath('userData', path.join(app.getPath('appData'), 'labokit-electron'));
+
+  // Handle file drops
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    // Prevent navigation on file drops
+    if (url.startsWith('file://')) {
+      event.preventDefault();
+    }
+  });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);

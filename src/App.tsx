@@ -14,6 +14,7 @@ function App() {
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const models = [
     { name: "RealESRGAN x4 Plus", value: "realesrgan-x4plus" },
@@ -48,6 +49,54 @@ function App() {
         setSelectedDimensions(dims);
       } catch (error) {
         console.error('Failed to get image dimensions:', error);
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    
+    if (files.length > 0) {
+      const file = files[0];
+      console.log('File dropped:', file.name, 'Size:', file.size, 'Type:', file.type);
+      
+      // Use Electron's webUtils to get the real file path
+      const filePath = window.electronAPI.getPathForFile(file);
+      console.log('File path from webUtils:', filePath);
+      
+      if (filePath) {
+        setSelectedFile(filePath);
+        setStatus("FILE LOADED");
+        setResultImage(null);
+        setResultDimensions(null);
+        
+        try {
+          const dims = await window.electronAPI.getImageDimensions(filePath);
+          setSelectedDimensions(dims);
+          console.log('Image dimensions:', dims);
+        } catch (error) {
+          console.error('Failed to get dimensions:', error);
+          setStatus("ERROR: Could not load image dimensions");
+        }
+      } else {
+        console.error('Could not get file path from dropped file');
+        setStatus("ERROR: Could not access file path");
       }
     }
   };
@@ -227,14 +276,24 @@ function App() {
             {/* File Selection Display */}
             <div 
                 onClick={handleSelectFile}
-                className="mb-4 py-4 border border-dashed border-gray-600 hover:border-orange-500 text-gray-400 text-xs text-center cursor-pointer transition-colors rounded"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`mb-4 py-4 border border-dashed transition-colors rounded cursor-pointer
+                  ${isDragOver 
+                    ? 'border-orange-500 bg-orange-500/10 text-orange-400' 
+                    : 'border-gray-600 hover:border-orange-500 text-gray-400'
+                  }
+                `}
             >
-              {selectedFile ? 
-                selectedFile.split('\\').pop() : 
-                "[ CLICK TO SELECT SUBJECT ]"
-              }
+              <div className="text-xs text-center">
+                {selectedFile ? 
+                  selectedFile.split('\\').pop() : 
+                  isDragOver ? "[ DROP IMAGE HERE ]" : "[ CLICK TO SELECT SUBJECT ]"
+                }
+              </div>
               {selectedDimensions && (
-                <div className="text-orange-500 text-xs mt-2">
+                <div className="text-orange-500 text-xs mt-2 text-center">
                   {selectedDimensions.width}x{selectedDimensions.height}px
                 </div>
               )}
