@@ -33,7 +33,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 #### **Linux Users:**
 ```bash
 # Download the app
-wget https://github.com/Chizuui/labokit-electron/releases/download/v1.0.0/LABOKit-Linux-1.0.0.AppImage
+wget https://github.com/Chizuui/labokit-electron/releases/download/v1.1/LABOKit-Linux-1.1.AppImage
 
 # Make it executable
 chmod +x LABOKit-Linux-1.0.0.AppImage
