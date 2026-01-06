@@ -19,6 +19,8 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 - Supports: JPG, PNG, WebP, BMP, GIF, SVG
 - Auto-adjusts colors and quality
 
+### Screenshots??
+- Check [Screenshots](#Capture)
 ---
 
 ## Installation
@@ -33,7 +35,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 #### **Linux Users:**
 ```bash
 # Download the app
-wget https://github.com/Chizuui/labokit-electron/releases/download/v1.0.0/LABOKit-Linux-1.0.0.AppImage
+wget https://github.com/Chizuui/labokit-electron/releases/download/v1.1/LABOKit-Linux-1.1.AppImage
 
 # Make it executable
 chmod +x LABOKit-Linux-1.0.0.AppImage
@@ -270,7 +272,6 @@ A: PNG or WebP give best results. JPG is smaller but lower quality.
 ## Support & Links
 
 - **Having issues?** Check [Troubleshooting](#troubleshooting) section above
-- **More details?** See [PYTHON_DEPENDENCIES.md](PYTHON_DEPENDENCIES.md)
 - **Want to code?** See development section above
 - **Report bug?** Open an issue on GitHub
 
@@ -294,7 +295,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
 
 
-## Screenshots
+## Capture
 
 <img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
 
