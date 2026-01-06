@@ -11,13 +11,26 @@ A sci-fi themed image processing application built with Electron, React, and Typ
 
 #### Linux
 ```bash
+# Install Python image processing dependencies (required for all features)
+pip install rembg torch torchvision onnxruntime
+
+# Download and run
 wget https://github.com/Chizuui/labokit-electron/releases/download/v1.0.0/LABOKit-Linux-1.0.0.AppImage
 chmod +x LABOKit-Linux-1.0.0.AppImage
 ./LABOKit-Linux-1.0.0.AppImage
 ```
 
+> **Note**: The AppImage bundles model files but requires Python packages to be installed on your system. This allows flexibility in package versions and CUDA support.
+
 #### Windows
-Download `LABOKit-Setup-1.0.0.exe` from [Releases](https://github.com/Chizuui/labokit-electron/releases) and run the installer.
+```bash
+# Install Python image processing dependencies (required for all features)
+pip install rembg torch torchvision onnxruntime
+
+# Download and run the installer
+# LABOKit-Setup-1.0.0.exe from https://github.com/Chizuui/labokit-electron/releases
+```
+Download from [Releases](https://github.com/Chizuui/labokit-electron/releases) and run the installer.
 
 ### For Developers (Build from Source)
 
@@ -221,6 +234,64 @@ Edit `src/index.css` for theme colors and effects:
 - Scanline effects opacity
 - Font definitions
 
+## Python Dependencies
+
+The application requires specific Python packages for image processing features. These are **NOT** bundled in the AppImage/EXE to allow flexibility in package versions and hardware acceleration (GPU/CUDA support).
+
+### Required Packages
+```bash
+pip install rembg torch torchvision onnxruntime
+```
+
+### What Each Package Does
+- **rembg**: Background removal using AI (remove-background feature)
+- **torch + torchvision**: Deep learning framework for ML models
+- **onnxruntime**: Efficient neural network inference engine
+
+### Alternative: Install All Optional Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+This installs all development dependencies including PIL and OpenCV for format conversion.
+
+### If You Don't Install Dependencies
+
+If you run the app without Python packages installed:
+- **Upscaling** still works (RealESRGAN binary is bundled)
+- **Format Conversion** still works (basic PIL included with Python)
+- **Background Removal** will fail with an error asking you to run the pip install command
+
+### First-Time Setup
+
+**Linux:**
+```bash
+# 1. Install system dependencies
+sudo apt update && sudo apt install python3 python3-pip  # Ubuntu/Debian
+# OR
+sudo dnf install python3 python3-pip  # Fedora
+# OR
+pacman -S python python-pip  # Arch
+
+# 2. Install Python packages
+pip install rembg torch torchvision onnxruntime
+
+# 3. Download and run AppImage
+./LABOKit-Linux-1.0.0.AppImage
+```
+
+**Windows:**
+```bash
+# 1. Download and install Python from python.org (3.10+)
+# 2. Install Python packages
+pip install rembg torch torchvision onnxruntime
+
+# 3. Run the installer
+LABOKit-Setup-1.0.0.exe
+```
+
+---
+
 ## IPC Communication
 
 The application uses Electron IPC for communication between main and renderer processes:
@@ -252,6 +323,8 @@ The application uses Electron IPC for communication between main and renderer pr
 ### General Issues
 | Problem | Solution |
 |---------|----------|
+| "Missing Python packages" error | Run `pip install rembg torch torchvision onnxruntime` |
+| Background removal not working | Ensure Python packages are installed (see Python Dependencies section) |
 | Models downloading slowly | First run downloads ~500MB, be patient |
 | High memory usage | Close other apps, LABOKit uses 2-4GB during processing |
 | File not found errors | Use absolute paths or drag-and-drop images |

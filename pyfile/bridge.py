@@ -88,8 +88,10 @@ def remove_background(input_path, output_path):
         
         try:
             from rembg import remove, new_session
-        except ImportError:
-            print("ERROR: rembg not installed. Install with: pip install rembg onnxruntime", flush=True)
+        except ImportError as e:
+            print("ERROR: Missing Python packages required for background removal", flush=True)
+            print("INSTALL_INSTRUCTIONS: Please install with:\n  pip install rembg torch torchvision onnxruntime", flush=True)
+            print(f"IMPORT_ERROR: {e}", flush=True)
             sys.exit(1)
         
         # Use local u2net model
