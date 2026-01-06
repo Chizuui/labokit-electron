@@ -10,10 +10,16 @@ A sci-fi themed image processing application built with Electron, React, and Typ
   
 - **Background Removal**: Remove image backgrounds using the rembg library with local u2net model
 
+- **Image Format Conversion**: Convert images between multiple formats
+  - Supported formats: JPG, PNG, WebP, BMP, GIF, and SVG
+  - Smart color space conversion (RGBA to RGB for non-transparent formats)
+  - Quality optimization for each format
+
 - **Advanced Zoom & Pan**: 
   - Multiple zoom levels (100%, 2x, 4x, 8x)
   - Drag-pan functionality for zoomed images
   - Smooth scrolling without visible scrollbars
+  - Support for both raster and SVG image viewing
 
 - **Real-time Resolution Tracking**: 
   - Display before/after resolution comparison
@@ -106,20 +112,23 @@ npm run build && npm run electron-builder
 
 ## Usage
 
-1. **Select Operation Mode**: Choose between "Upscale" or "Remove BG"
+1. **Select Operation Mode**: Choose between:
+   - **Upscale**: Enhance image resolution with AI upscaling
+   - **Remove BG**: Remove image background automatically
+   - **Convert**: Convert image to different formats
 
-2. **Select Model** (for Upscaling):
-   - RealESRGAN x4 Plus
-   - RealESRGAN x4 Plus Anime
-   - RealESR Anime x2/x3/x4
+2. **Select Model or Format**:
+   - For Upscaling: Choose from RealESRGAN x4 Plus, RealESRGAN x4 Plus Anime, or RealESR Anime x2/x3/x4
+   - For Converting: Select output format (JPG, PNG, WebP, BMP, GIF, or SVG)
 
-3. **Load Image**: Click on the image selector to choose an image file
+3. **Load Image**: Click on the image selector or drag-and-drop an image file
 
 4. **Execute**: Click "Execute Operation" to process the image
 
 5. **View Results**: 
    - Use zoom buttons (100%, 2x, 4x, 8x) to inspect details
    - Drag to pan when zoomed in
+   - SVG and raster images both supported
    - Clear result button to reset for new processing
 
 ## Configuration
