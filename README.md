@@ -19,7 +19,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 - Supports: JPG, PNG, WebP, BMP, GIF, SVG
 - Auto-adjusts colors and quality
 
-### Capture??
+### Screenshots??
 - Check [Screenshots](#Screenshots)
 ---
 
