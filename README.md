@@ -292,3 +292,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Disclaimer
 
 This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
+
+
+## Screenshots
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
+
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/40ddaa25-1fda-4b94-81b0-c8356cce66c3" />
+
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/c4f4a998-14b1-405d-82cc-b41915155fc1" />
+
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/f265db64-1cd7-49d4-bc40-98d38b472d16" />
+
