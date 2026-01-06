@@ -278,14 +278,17 @@ A: PNG or WebP give best results. JPG is smaller but lower quality.
 
 ## Credits
 
-- **RealESRGAN:** Image upscaling AI
-- **rembg:** Background removal AI
-- **Electron:** Desktop framework
-- **React:** User interface
-- **Steins;Gate:** UI inspiration
+- **RealESRGAN**: https://github.com/xinntao/Real-ESRGAN
+- **rembg**: https://github.com/danielgatis/rembg
+- **Steins;Gate**: Original anime by White Fox
+- **LABOKit (Original Source)**: https://github.com/wagakano/LABOKit
 
 ---
 
 ## License
 
-MIT License - You're free to use and modify!
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
+This application uses third-party models and libraries. Please respect their respective licenses and usage terms.
