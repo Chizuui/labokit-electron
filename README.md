@@ -2,18 +2,29 @@
 
 A sci-fi themed image processing application built with Electron, React, and TypeScript. Features real-time image upscaling and background removal with an immersive retro-futuristic UI inspired by *Steins;Gate*.
 
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/a109d265-5039-44ec-9730-042a53ee95f5" />
+
 ## Features
 
 - **Image Upscaling**: Enhance image resolution using RealESRGAN models
   - Support for 2x, 3x, and 4x scaling
   - Anime-specific models available (RealESR Anime and RealESRGAN Anime)
-  
-- **Background Removal**: Remove image backgrounds using the rembg library with local u2net model
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/40ddaa25-1fda-4b94-81b0-c8356cce66c3" />
+
+
+- **Background Removal**: Remove image backgrounds using the rembg library with local u2net model ( still WIP )
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/c4f4a998-14b1-405d-82cc-b41915155fc1" />
+
 
 - **Image Format Conversion**: Convert images between multiple formats
   - Supported formats: JPG, PNG, WebP, BMP, GIF, and SVG
   - Smart color space conversion (RGBA to RGB for non-transparent formats)
   - Quality optimization for each format
+
+<img width="1501" height="781" alt="image" src="https://github.com/user-attachments/assets/f265db64-1cd7-49d4-bc40-98d38b472d16" />
+
 
 - **Advanced Zoom & Pan**: 
   - Multiple zoom levels (100%, 2x, 4x, 8x)
