@@ -207,6 +207,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - **RealESRGAN**: https://github.com/xinntao/Real-ESRGAN
 - **rembg**: https://github.com/danielgatis/rembg
 - **Steins;Gate**: Original anime by White Fox
+- **LABOKit ( Original Source )**: https://github.com/wagakano/LABOKit
 
 ## Disclaimer
 
