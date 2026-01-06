@@ -1,5 +1,7 @@
 {
   "name": "labokit",
+  "description": "A sci-fi themed image processing application with AI upscaling, background removal, and format conversion",
+  "author": "LABOKit Team",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -8,7 +10,7 @@
     "build": "tsc && vite build && electron-builder",
     "build:win": "tsc && vite build && electron-builder --win portable nsis",
     "build:linux": "tsc && vite build && electron-builder --linux AppImage",
-    "build:all": "tsc && vite build && electron-builder -mwl",
+    "build:all": "tsc && vite build && electron-builder --win",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
