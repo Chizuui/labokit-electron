@@ -19,6 +19,8 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 - Supports: JPG, PNG, WebP, BMP, GIF, SVG
 - Auto-adjusts colors and quality
 
+### Capture??
+Check [Screenshots](#Screenshots)
 ---
 
 ## Installation
@@ -270,7 +272,6 @@ A: PNG or WebP give best results. JPG is smaller but lower quality.
 ## Support & Links
 
 - **Having issues?** Check [Troubleshooting](#troubleshooting) section above
-- **More details?** See [PYTHON_DEPENDENCIES.md](PYTHON_DEPENDENCIES.md)
 - **Want to code?** See development section above
 - **Report bug?** Open an issue on GitHub
 
