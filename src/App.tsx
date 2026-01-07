@@ -19,7 +19,6 @@ function App() {
   const [isDragOverPreview, setIsDragOverPreview] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [guidePage, setGuidePage] = useState(1);
-  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
