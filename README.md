@@ -29,7 +29,7 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 
 #### **Windows Users:**
 1. Download from [Releases](https://github.com/Chizuui/labokit-electron/releases)
-2. Run `LABOKit-Setup-1.0.0.exe`
+2. Run `LABOKit-Setup-*.exe`
 3. Done! Open the app
 
 #### **Linux Users:**
@@ -123,8 +123,8 @@ pip install rembg torch torchvision onnxruntime
 
 **Solution:**
 ```bash
-chmod +x LABOKit-Linux-1.0.0.AppImage
-./LABOKit-Linux-1.0.0.AppImage
+chmod +x LABOKit-Linux-*.AppImage
+./LABOKit-Linux-*.AppImage
 ```
 
 ### Problem: "FUSE2 not found" error (Linux)
