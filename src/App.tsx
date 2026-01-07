@@ -17,6 +17,9 @@ function App() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragOver, setIsDragOver] = useState(false);
   const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const models = [
     { name: "RealESRGAN x4 Plus", value: "realesrgan-x4plus" },
@@ -49,6 +52,24 @@ function App() {
       try {
         const dims = await window.electronAPI.getImageDimensions(filePath);
         setSelectedDimensions(dims);
+        
+        // Load preview image as base64
+        const base64 = await window.electronAPI.readImageAsBase64(filePath);
+        let mimeType = 'image/jpeg';
+        
+        if (filePath.toLowerCase().endsWith('.png')) {
+          mimeType = 'image/png';
+        } else if (filePath.toLowerCase().endsWith('.webp')) {
+          mimeType = 'image/webp';
+        } else if (filePath.toLowerCase().endsWith('.gif')) {
+          mimeType = 'image/gif';
+        } else if (filePath.toLowerCase().endsWith('.bmp')) {
+          mimeType = 'image/bmp';
+        } else if (filePath.toLowerCase().endsWith('.svg')) {
+          mimeType = 'image/svg+xml';
+        }
+        
+        setSelectedImagePreview(`data:${mimeType};base64,${base64}`);
       } catch (error) {
         console.error('Failed to get image dimensions:', error);
       }
@@ -91,6 +112,24 @@ function App() {
         try {
           const dims = await window.electronAPI.getImageDimensions(filePath);
           setSelectedDimensions(dims);
+          
+          // Load preview image as base64
+          const base64 = await window.electronAPI.readImageAsBase64(filePath);
+          let mimeType = 'image/jpeg';
+          
+          if (filePath.toLowerCase().endsWith('.png')) {
+            mimeType = 'image/png';
+          } else if (filePath.toLowerCase().endsWith('.webp')) {
+            mimeType = 'image/webp';
+          } else if (filePath.toLowerCase().endsWith('.gif')) {
+            mimeType = 'image/gif';
+          } else if (filePath.toLowerCase().endsWith('.bmp')) {
+            mimeType = 'image/bmp';
+          } else if (filePath.toLowerCase().endsWith('.svg')) {
+            mimeType = 'image/svg+xml';
+          }
+          
+          setSelectedImagePreview(`data:${mimeType};base64,${base64}`);
           console.log('Image dimensions:', dims);
         } catch (error) {
           console.error('Failed to get dimensions:', error);
@@ -108,6 +147,8 @@ function App() {
 
     setStatus("PROCESSING...");
     setProgress("");
+    setProgressPercent(0);
+    setIsProcessing(true);
     
     // Glitch animation start
     const interval = setInterval(() => {
@@ -115,6 +156,14 @@ function App() {
     }, 100);
 
     try {
+      // Simulate progress increments
+      const progressInterval = setInterval(() => {
+        setProgressPercent(prev => {
+          if (prev < 95) return prev + Math.random() * 20;
+          return prev;
+        });
+      }, 500);
+
       // Call Python Backend
       const result = await window.electronAPI.processImage({
         filePath: selectedFile,
@@ -122,6 +171,9 @@ function App() {
         model: operation === 'upscale' ? model : undefined,
         format: operation === 'convert' ? convertFormat : undefined
       });
+      
+      clearInterval(progressInterval);
+      setProgressPercent(100);
       
       console.log("Processed:", result);
       setStatus("COMPLETE");
@@ -162,6 +214,8 @@ function App() {
       setResultDimensions(null);
     } finally {
       clearInterval(interval);
+      setIsProcessing(false);
+      setTimeout(() => setProgressPercent(0), 1000);
     }
   };
 
@@ -523,12 +577,84 @@ function App() {
                   </div>
                 </div>
               </>
+            ) : selectedImagePreview ? (
+              <>
+                {/* Preview of Selected Image */}
+                <div
+                  className="overflow-hidden border border-orange-600/50 rounded w-full select-none"
+                  style={{ 
+                    flex: '1 1 0',
+                    minHeight: '0',
+                    display: 'flex', 
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                  }}
+                >
+                  <img 
+                    src={selectedImagePreview ?? ''} 
+                    alt="Selected image preview" 
+                    className="pointer-events-none"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      userSelect: 'none'
+                    }}
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Info Bar - Floating at Bottom */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 px-4 py-2 border border-gray-600 flex items-center justify-between gap-4 bg-gray-900/80 rounded">
+                  <button
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setSelectedImagePreview(null);
+                      setSelectedDimensions(null);
+                    }}
+                    className="text-gray-400 text-xs uppercase hover:text-orange-400 transition-colors"
+                  >
+                    Clear Selection
+                  </button>
+                  <div className="font-mono text-sm text-orange-500 tracking-widest">
+                    {divergence}
+                  </div>
+                </div>
+              </>
             ) : (
               <div className="text-center text-gray-600 flex-1 flex flex-col items-center justify-center">
                 <div className="text-lg mb-4">⏳</div>
                 <p className="text-xs uppercase tracking-widest">
                   {selectedFile ? 'Ready to process' : 'Select an image to begin'}
                 </p>
+              </div>
+            )}
+
+            {/* Progress Overlay - Blur Background with Percentage */}
+            {isProcessing && progressPercent > 0 && (
+              <div 
+                className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded"
+                style={{
+                  backdropFilter: 'blur(5px)'
+                }}
+              >
+                <div className="text-center">
+                  <div className="text-6xl font-bold text-orange-500 mb-4 font-mono">
+                    {Math.round(progressPercent)}%
+                  </div>
+                  <div className="w-48 h-2 bg-gray-800/50 border border-orange-600/50 rounded overflow-hidden mb-4">
+                    <div 
+                      className="h-full bg-orange-600 transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="text-orange-400 text-xs uppercase tracking-widest">
+                    {getProgressDisplay() || 'Processing...'}
+                  </p>
+                </div>
               </div>
             )}
           </div>
