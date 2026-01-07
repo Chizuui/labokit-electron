@@ -195,7 +195,7 @@ npm run build:linux
 
 **Windows:**
 ```bash
-npm run build:win
+npm run build
 # Creates: LABOKit-Setup-1.0.0.exe
 ```
 
