@@ -54,6 +54,23 @@ def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
         
         print(f"MODEL_SELECTED:{model}", flush=True)
         
+        # Check if input image has transparency
+        input_img = Image.open(input_path)
+        has_alpha = input_img.mode in ['RGBA', 'LA', 'PA'] or (input_img.mode == 'P' and 'transparency' in input_img.info)
+        
+        if has_alpha:
+            print("DETECTED_TRANSPARENT_IMAGE", flush=True)
+            # Extract alpha channel before upscaling
+            if input_img.mode == 'P':
+                input_img = input_img.convert('RGBA')
+            alpha_channel = input_img.split()[-1]
+            
+            # Scale alpha channel separately
+            alpha_scaled = alpha_channel.resize(
+                (alpha_channel.width * scale, alpha_channel.height * scale),
+                Image.Resampling.LANCZOS
+            )
+        
         # Build command with proper path separators
         cmd = [
             str(realesrgan_exe),
@@ -70,6 +87,14 @@ def upscale_image(input_path, output_path, model="realesrgan-x4plus"):
         
         if result.returncode != 0:
             raise RuntimeError(f"RealESRGAN failed: {result.stderr}")
+        
+        # Post-process: restore transparency if original had alpha
+        if has_alpha:
+            print("RESTORING_TRANSPARENCY", flush=True)
+            upscaled_img = Image.open(output_path)
+            upscaled_img = upscaled_img.convert('RGBA')
+            upscaled_img.putalpha(alpha_scaled)
+            upscaled_img.save(output_path, 'PNG')
         
         print("UPSCALE_COMPLETE", flush=True)
         print("SAVING", flush=True)
