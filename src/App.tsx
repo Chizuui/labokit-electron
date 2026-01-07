@@ -16,6 +16,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragOver, setIsDragOver] = useState(false);
+  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
 
   const models = [
     { name: "RealESRGAN x4 Plus", value: "realesrgan-x4plus" },
@@ -448,8 +449,9 @@ function App() {
                     flex: '1 0 0',
                     minHeight: '0',
                     display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center' 
+                    alignItems: zoom > 1 ? 'flex-start' : 'center',
+                    justifyContent: zoom > 1 ? 'flex-start' : 'center',
+                    padding: zoom > 1 ? '0' : '0'
                   }}
                   onMouseDown={(e) => {
                     if (zoom > 1) {
@@ -459,11 +461,14 @@ function App() {
                   }}
                   onMouseMove={(e) => {
                     if (!isDragging || zoom <= 1) return;
+                    
                     const container = e.currentTarget;
                     const dx = e.clientX - dragStart.x;
                     const dy = e.clientY - dragStart.y;
+                    
                     container.scrollLeft -= dx;
                     container.scrollTop -= dy;
+                    
                     setDragStart({ x: e.clientX, y: e.clientY });
                   }}
                   onMouseUp={() => setIsDragging(false)}
