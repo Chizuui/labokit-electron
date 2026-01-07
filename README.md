@@ -35,13 +35,13 @@ Change image type: JPG → PNG, PNG → WebP, etc.
 #### **Linux Users:**
 ```bash
 # Download the app
-wget https://github.com/Chizuui/labokit-electron/releases/download/v1.1/LABOKit-Linux-1.1.AppImage
+wget https://github.com/Chizuui/labokit-electron/releases/download/v1.3/LABOKit-Linux-1.3.0.AppImage
 
 # Make it executable
-chmod +x LABOKit-Linux-1.0.0.AppImage
+chmod +x LABOKit-Linux-1.3.0.AppImage
 
 # Run it
-./LABOKit-Linux-1.0.0.AppImage
+./LABOKit-Linux-1.3.0.AppImage
 ```
 
 ---
@@ -166,6 +166,7 @@ pacman -S fuse2
 ## For Developers
 
 Want to modify the code? Here's how to set up development:
+- Make sure git lfs already installed
 
 ### Linux:
 ```bash
