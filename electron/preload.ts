@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: () => ipcRenderer.invoke('dialog:openFile'),
-  processImage: (data: { filePath: string; operation: string; model?: string }) => 
+  processImage: (data: { filePath: string; operation: string; model?: string; format?: string }) => 
     ipcRenderer.invoke('process-image', data),
   readImageAsBase64: (filePath: string) =>
     ipcRenderer.invoke('read-image-base64', filePath),

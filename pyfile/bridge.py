@@ -169,8 +169,19 @@ def convert_image(input_path, output_path, output_format="png"):
             background.paste(img, mask=img.split()[-1] if img.mode in ['RGBA', 'LA'] else None)
             img = background
         
-        print(f"SAVING_AS_{output_format.upper()}", flush=True)
-        
+        # Normalize output format for PIL (e.g. 'jpg' -> 'JPEG')
+        format_map = {
+            'jpg': 'JPEG',
+            'jpeg': 'JPEG',
+            'png': 'PNG',
+            'webp': 'WEBP',
+            'bmp': 'BMP',
+            'gif': 'GIF'
+        }
+        pil_format = format_map.get(output_format.lower(), output_format.upper())
+
+        print(f"SAVING_AS_{pil_format}", flush=True)
+
         # Determine output format and quality settings
         save_kwargs = {}
         if output_format.lower() in ['jpg', 'jpeg']:
@@ -185,8 +196,8 @@ def convert_image(input_path, output_path, output_format="png"):
             if img.mode != 'P':
                 img = img.convert('P', palette=Image.Palette.ADAPTIVE)
         
-        # Save the image
-        img.save(output_path, format=output_format.upper(), **save_kwargs)
+        # Save the image using normalized PIL format name
+        img.save(output_path, format=pil_format, **save_kwargs)
         
         print("SUCCESS", flush=True)
     except Exception as e:

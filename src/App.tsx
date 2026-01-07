@@ -16,6 +16,9 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragOverPreview, setIsDragOverPreview] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [guidePage, setGuidePage] = useState(1);
   const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState(0);
@@ -39,40 +42,58 @@ function App() {
     return () => unsubscribe?.();
   }, []);
 
+  // Keyboard shortcut: open guide on F1 or ?
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F1' || e.key === '?') {
+        e.preventDefault();
+        setGuidePage(1);
+        setShowGuide(true);
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectFile = async () => {
     const filePath = await window.electronAPI.openFile();
     if (filePath) {
-      setSelectedFile(filePath);
-      setStatus("FILE LOADED");
-      setResultImage(null);
-      setResultDimensions(null);
-      
-      // Get selected image dimensions
-      try {
-        const dims = await window.electronAPI.getImageDimensions(filePath);
-        setSelectedDimensions(dims);
-        
-        // Load preview image as base64
-        const base64 = await window.electronAPI.readImageAsBase64(filePath);
-        let mimeType = 'image/jpeg';
-        
-        if (filePath.toLowerCase().endsWith('.png')) {
-          mimeType = 'image/png';
-        } else if (filePath.toLowerCase().endsWith('.webp')) {
-          mimeType = 'image/webp';
-        } else if (filePath.toLowerCase().endsWith('.gif')) {
-          mimeType = 'image/gif';
-        } else if (filePath.toLowerCase().endsWith('.bmp')) {
-          mimeType = 'image/bmp';
-        } else if (filePath.toLowerCase().endsWith('.svg')) {
-          mimeType = 'image/svg+xml';
-        }
-        
-        setSelectedImagePreview(`data:${mimeType};base64,${base64}`);
-      } catch (error) {
-        console.error('Failed to get image dimensions:', error);
+      await loadFileAsSelection(filePath);
+    }
+  };
+
+  // Helper: load file path into selected state (used by click or drop)
+  const loadFileAsSelection = async (filePath: string) => {
+    setSelectedFile(filePath);
+    setStatus("FILE LOADED");
+    setResultImage(null);
+    setResultDimensions(null);
+
+    try {
+      const dims = await window.electronAPI.getImageDimensions(filePath);
+      setSelectedDimensions(dims);
+
+      const base64 = await window.electronAPI.readImageAsBase64(filePath);
+      let mimeType = 'image/jpeg';
+
+      if (filePath.toLowerCase().endsWith('.png')) {
+        mimeType = 'image/png';
+      } else if (filePath.toLowerCase().endsWith('.webp')) {
+        mimeType = 'image/webp';
+      } else if (filePath.toLowerCase().endsWith('.gif')) {
+        mimeType = 'image/gif';
+      } else if (filePath.toLowerCase().endsWith('.bmp')) {
+        mimeType = 'image/bmp';
+      } else if (filePath.toLowerCase().endsWith('.svg')) {
+        mimeType = 'image/svg+xml';
       }
+
+      setSelectedImagePreview(`data:${mimeType};base64,${base64}`);
+    } catch (error) {
+      console.error('Failed to get image dimensions:', error);
+      setStatus("ERROR: Could not load image dimensions");
     }
   };
 
@@ -104,39 +125,39 @@ function App() {
       console.log('File path from webUtils:', filePath);
       
       if (filePath) {
-        setSelectedFile(filePath);
-        setStatus("FILE LOADED");
-        setResultImage(null);
-        setResultDimensions(null);
-        
-        try {
-          const dims = await window.electronAPI.getImageDimensions(filePath);
-          setSelectedDimensions(dims);
-          
-          // Load preview image as base64
-          const base64 = await window.electronAPI.readImageAsBase64(filePath);
-          let mimeType = 'image/jpeg';
-          
-          if (filePath.toLowerCase().endsWith('.png')) {
-            mimeType = 'image/png';
-          } else if (filePath.toLowerCase().endsWith('.webp')) {
-            mimeType = 'image/webp';
-          } else if (filePath.toLowerCase().endsWith('.gif')) {
-            mimeType = 'image/gif';
-          } else if (filePath.toLowerCase().endsWith('.bmp')) {
-            mimeType = 'image/bmp';
-          } else if (filePath.toLowerCase().endsWith('.svg')) {
-            mimeType = 'image/svg+xml';
-          }
-          
-          setSelectedImagePreview(`data:${mimeType};base64,${base64}`);
-          console.log('Image dimensions:', dims);
-        } catch (error) {
-          console.error('Failed to get dimensions:', error);
-          setStatus("ERROR: Could not load image dimensions");
-        }
+        await loadFileAsSelection(filePath);
+        console.log('Image dimensions loaded from drop');
       } else {
         console.error('Could not get file path from dropped file');
+        setStatus("ERROR: Could not access file path");
+      }
+    }
+  };
+
+  const handlePreviewDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverPreview(true);
+  };
+
+  const handlePreviewDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverPreview(false);
+  };
+
+  const handlePreviewDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverPreview(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      const file = files[0];
+      const filePath = window.electronAPI.getPathForFile(file);
+      if (filePath) {
+        await loadFileAsSelection(filePath);
+      } else {
         setStatus("ERROR: Could not access file path");
       }
     }
@@ -159,7 +180,10 @@ function App() {
       // Simulate progress increments
       const progressInterval = setInterval(() => {
         setProgressPercent(prev => {
-          if (prev < 95) return prev + Math.random() * 20;
+          if (prev < 95) {
+            const next = prev + Math.random() * 20;
+            return Math.min(95, Math.round(next));
+          }
           return prev;
         });
       }, 500);
@@ -290,7 +314,7 @@ function App() {
       <div className="flex flex-1 relative overflow-hidden bg-gray-900 scanlines flex-col">
         <div className="flex flex-1 overflow-hidden gap-3 p-4">
           {/* Left Sidebar - Controls */}
-          <div className="w-80 flex-shrink-0 border border-gray-700 bg-gray-900/80 p-6 overflow-y-auto flex flex-col rounded">
+          <div className="w-80 flex-shrink-0 border border-gray-700 bg-gray-900/80 p-6 overflow-y-auto flex flex-col rounded relative">
             <h1 className="text-gray-500 tracking-[0.5em] text-xs mb-8 uppercase">
               LABOKit <span className="text-orange-600">Electron Ver</span>
             </h1>
@@ -394,7 +418,7 @@ function App() {
               <div className="text-xs text-center">
                 {selectedFile ? 
                   selectedFile.split('\\').pop() : 
-                  isDragOver ? "[ DROP IMAGE HERE ]" : "[ CLICK TO SELECT SUBJECT ]"
+                  isDragOver ? "[ DROP IMAGE HERE ]" : "[ SELECT IMAGE ]"
                 }
               </div>
               {selectedDimensions && (
@@ -440,10 +464,34 @@ function App() {
             <div className="font-mono text-xs text-orange-800">
               STATUS: [{status}]
             </div>
+
+            {/* How to use? button moved to left sidebar bottom */}
+            <button
+              onClick={() => { setGuidePage(1); setShowGuide(true); }}
+              title="Open guide (F1 or ?)"
+              className="absolute left-4 bottom-4 z-30 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest rounded border border-gray-600 bg-gray-800/60 text-gray-200 hover:bg-gray-700/80"
+            >
+              How to use?
+            </button>
           </div>
 
           {/* Right Panel - Result Display */}
-          <div className="flex-1 flex flex-col overflow-hidden border border-orange-600/50 rounded bg-gray-900/50 relative min-h-0" style={{ maxHeight: '100%' }}>
+          <div
+            className="flex-1 flex flex-col overflow-hidden border border-orange-600/50 rounded bg-gray-900/50 relative min-h-0"
+            style={{ maxHeight: '100%' }}
+            onDragOver={handlePreviewDragOver}
+            onDragLeave={handlePreviewDragLeave}
+            onDrop={handlePreviewDrop}
+          >
+            {/* Drag overlay for preview area */}
+            {isDragOverPreview && (
+              <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded pointer-events-none">
+                <div className="text-center p-6 rounded border border-gray-600 bg-gray-900/70">
+                  <div className="text-xl text-orange-400 font-bold mb-2">Release to proceed</div>
+                  <div className="text-xs text-gray-300">Drop image to select</div>
+                </div>
+              </div>
+            )}
             {/* Zoom Controls - Floating at Top Center (Only when result exists) */}
             {resultImage && (
               <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 border border-gray-600 bg-gray-900/80 rounded p-2">
@@ -654,6 +702,61 @@ function App() {
                   <p className="text-orange-400 text-xs uppercase tracking-widest">
                     {getProgressDisplay() || 'Processing...'}
                   </p>
+                </div>
+              </div>
+            )}
+
+            
+
+            {/* Guide Modal (2 pages) */}
+            {showGuide && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowGuide(false)} />
+                <div className="relative z-60 w-[min(800px,90%)] max-h-[80%] overflow-auto rounded bg-gray-900/95 border border-orange-600/40 p-6 text-sm text-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setGuidePage((p) => Math.max(1, p - 1))}
+                        disabled={guidePage === 1}
+                        className={`px-2 py-1 rounded border ${guidePage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-800'} text-gray-300`}
+                      >
+                        ← Prev
+                      </button>
+                      <h2 className="text-lg font-bold text-orange-400">Guide — Page {guidePage} / 2</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setShowGuide(false)} className="text-xs text-gray-300 px-2 py-1 rounded hover:bg-gray-800">Close ✕</button>
+                      <button
+                        onClick={() => setGuidePage((p) => Math.min(2, p + 1))}
+                        disabled={guidePage === 2}
+                        className={`px-2 py-1 rounded border ${guidePage === 2 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-800'} text-gray-300`}
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Page content */}
+                  {guidePage === 1 ? (
+                    <div className="space-y-4">
+                      <div className="text-gray-300 font-semibold">Install Required Packages (python must be installed)</div>
+                      <div className="text-gray-300">Open Command Prompt (Windows) or Terminal (Linux/Mac) and run:</div>
+                      <pre className="bg-gray-800 p-3 rounded text-xs font-mono text-green-300 overflow-auto">pip install rembg torch torchvision onnxruntime</pre>
+                      <div className="text-gray-400 text-xs">If you use a virtual environment, activate it first.</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <ol className="list-decimal list-inside space-y-3 text-gray-300">
+                        <li><strong>Select an image:</strong> Click the left panel area or drag & drop an image file onto it.</li>
+                        <li><strong>Or drag to preview:</strong> Drag an image file from Explorer and drop it into the large preview area — release when you see "Release to proceed".</li>
+                        <li><strong>Choose operation:</strong> Pick <em>Upscale</em>, <em>Remove BG</em>, or <em>Convert</em> in the left toolbar.</li>
+                        <li><strong>Pick model/format:</strong> When using Upscale choose a model, or pick an output format for Convert.</li>
+                        <li><strong>Execute:</strong> Click <em>Execute Operation</em> to run processing. A progress overlay will display percent complete.</li>
+                        <li><strong>View result:</strong> When complete, the processed result appears in the preview area. Use the Clear button to remove it.</li>
+                        <li><strong>Tip:</strong> Use zoom controls (when result appears) to inspect details. You can also drag to pan when zoomed.</li>
+                      </ol>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
