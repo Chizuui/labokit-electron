@@ -185,6 +185,27 @@ npm install
 npm run dev
 ```
 
+## Deploying the Web Version (Vercel or any static host)
+
+This repository now includes a browser-friendly renderer so the UI can be hosted as a static site (for example on Vercel). Electron-only features (native image processing, IPC) are disabled in the browser — the UI still supports selecting and previewing images, but processing is only available in the desktop Electron app.
+
+Quick deploy steps (Vercel):
+
+1. Commit and push your branch to GitHub.
+2. On Vercel, create a new project from this GitHub repo.
+3. Vercel will run the `build` script (which runs `tsc && vite build`) and publish the `dist` folder. The included `vercel.json` config sets `dist` as the output directory.
+
+Local preview of the production build:
+
+```pwsh
+npm run build
+npm run preview
+```
+
+Notes:
+- The browser build cannot run the Python/ONNX processing from the desktop app. To enable remote processing you would implement a server-side API and adapt `src/rendererApi.ts` to call it.
+- Electron builds are still available using `npm run build:electron`.
+
 ### Build for Distribution:
 
 **Linux:**

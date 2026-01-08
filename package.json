@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite",
     "dev:linux": "vite --host",
-    "build": "tsc && vite build && electron-builder",
+    "build": "tsc && vite build",
+    "build:electron": "tsc && vite build && electron-builder",
     "build:win": "tsc && vite build && electron-builder --win portable nsis",
     "build:linux": "tsc && vite build && electron-builder --linux AppImage",
     "build:all": "tsc && vite build && electron-builder --win",
@@ -18,6 +19,7 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "image-size": "^2.0.2",
+    "onnxruntime-web": "^1.23.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^3.4.0"

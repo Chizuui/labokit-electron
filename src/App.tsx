@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './index.css';
+import { api } from './rendererApi';
 
 function App() {
   const [divergence, setDivergence] = useState("1.048596");
@@ -32,8 +33,8 @@ function App() {
   ];
 
   useEffect(() => {
-    // Listen for progress updates from Electron
-    const unsubscribe = window.electronAPI?.onProcessProgress?.((data: any) => {
+    // Listen for progress updates from Electron (if available)
+    const unsubscribe = api?.onProcessProgress?.((data: any) => {
       setProgress(data.stage);
       console.log('Progress:', data.stage);
     });
@@ -57,7 +58,7 @@ function App() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectFile = async () => {
-    const filePath = await window.electronAPI.openFile();
+    const filePath = await api.openFile();
     if (filePath) {
       await loadFileAsSelection(filePath);
     }
@@ -71,10 +72,10 @@ function App() {
     setResultDimensions(null);
 
     try {
-      const dims = await window.electronAPI.getImageDimensions(filePath);
+      const dims = await api.getImageDimensions(filePath);
       setSelectedDimensions(dims);
 
-      const base64 = await window.electronAPI.readImageAsBase64(filePath);
+      const base64 = await api.readImageAsBase64(filePath);
       let mimeType = 'image/jpeg';
 
       if (filePath.toLowerCase().endsWith('.png')) {
@@ -120,7 +121,20 @@ function App() {
       console.log('File dropped:', file.name, 'Size:', file.size, 'Type:', file.type);
       
       // Use Electron's webUtils to get the real file path
-      const filePath = window.electronAPI.getPathForFile(file);
+      // In browser fall back to reading file as data URL
+      let filePath: any = null;
+      if ((api as any).getPathForFile) {
+        filePath = (api as any).getPathForFile(file);
+      }
+      if (!filePath) {
+        // read as data URL
+        filePath = await new Promise<string | null>((res) => {
+          const reader = new FileReader();
+          reader.onload = () => res(String(reader.result));
+          reader.onerror = () => res(null);
+          reader.readAsDataURL(file);
+        });
+      }
       console.log('File path from webUtils:', filePath);
       
       if (filePath) {
@@ -153,7 +167,18 @@ function App() {
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       const file = files[0];
-      const filePath = window.electronAPI.getPathForFile(file);
+      let filePath: any = null;
+      if ((api as any).getPathForFile) {
+        filePath = (api as any).getPathForFile(file);
+      }
+      if (!filePath) {
+        filePath = await new Promise<string | null>((res) => {
+          const reader = new FileReader();
+          reader.onload = () => res(String(reader.result));
+          reader.onerror = () => res(null);
+          reader.readAsDataURL(file);
+        });
+      }
       if (filePath) {
         await loadFileAsSelection(filePath);
       } else {
@@ -187,8 +212,8 @@ function App() {
         });
       }, 500);
 
-      // Call Python Backend
-      const result = await window.electronAPI.processImage({
+      // Call Python Backend (only available in Electron desktop app)
+      const result = await api.processImage({
         filePath: selectedFile,
         operation: operation,
         model: operation === 'upscale' ? model : undefined,
@@ -204,7 +229,7 @@ function App() {
       
       // Load result image as base64
       try {
-        const base64 = await window.electronAPI.readImageAsBase64(result);
+        const base64 = await api.readImageAsBase64(result);
         let mimeType = 'image/jpeg';
         
         if (result.toLowerCase().endsWith('.png')) {
@@ -261,15 +286,15 @@ function App() {
   };
 
   const handleMinimize = () => {
-    window.electronAPI?.minimizeWindow?.();
+    api?.minimizeWindow?.();
   };
 
   const handleMaximize = () => {
-    window.electronAPI?.maximizeWindow?.();
+    api?.maximizeWindow?.();
   };
 
   const handleClose = () => {
-    window.electronAPI?.closeWindow?.();
+    api?.closeWindow?.();
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
